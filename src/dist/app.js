@@ -1,4 +1,9 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const routes_1 = __importDefault(require("./routes/routes"));
 const fastify = require("fastify");
 const mongoose = require("mongoose");
 require("dotenv").config();
@@ -15,6 +20,8 @@ mongoose
     .catch((err) => {
     console.log(err);
 });
+// Routes
+app.register(routes_1.default, { prefix: "/api/quiz" });
 const PORT = process.env.PORT || 3000;
 // Starting server
 try {

@@ -1,9 +1,12 @@
+import { FastifyInstance } from "fastify";
+import routes from "./routes/routes";
 const fastify = require("fastify");
 const mongoose = require("mongoose");
-require("dotenv").config();
-const db_url = process.env.DB_URI;
 
-const app = fastify({
+require("dotenv").config();
+const db_url: string | undefined = process.env.DB_URI;
+
+const app: FastifyInstance = fastify({
   logger: true,
 });
 
@@ -17,7 +20,10 @@ mongoose
     console.log(err);
   });
 
-const PORT = process.env.PORT || 3000;
+// Routes
+app.register(routes, { prefix: "/api/quiz" });
+
+const PORT: string | number = process.env.PORT || 3000;
 
 // Starting server
 try {
