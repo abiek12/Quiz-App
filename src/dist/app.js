@@ -16,12 +16,13 @@ mongoose
     console.log(err);
 });
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, (err, address) => {
-    if (err) {
-        fastify.log.error(err);
-        process.exit(1);
-    }
-    else {
-        console.log(`Server listening at ${address}`);
-    }
-});
+// Starting server
+try {
+    app.listen(PORT, () => {
+        console.log(`Server running at ${PORT}`);
+    });
+}
+catch (error) {
+    app.log.error(error);
+    process.exit(1);
+}
