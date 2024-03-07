@@ -24,12 +24,16 @@ function uploadQuestions(req, replay) {
             const existngCategory = yield quizModel_1.default.findOne({
                 category: Category,
             });
-            if (typeof existngCategory == null) {
+            if (existngCategory == null) {
                 yield quizModel_1.default.create({
                     category: Category,
                     questions: [{ question: Question, options: Options, answer: Answer }],
                 });
-                replay.code(200).send("Succesfully uploaded");
+                replay.code(200).send("Uploaded successfully");
+            }
+            else {
+                //   await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
+                replay.code(200).send("Question added successfully");
             }
         }
         catch (error) { }
