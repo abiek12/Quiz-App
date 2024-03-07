@@ -1,13 +1,25 @@
 import mongoose from "mongoose";
+import { Document, Schema, Model } from "mongoose";
 
-const quizSchema = new mongoose.Schema({
+interface Questions {
+  question: string;
+  options: String[];
+  answer: string;
+}
+
+interface quizDocument extends Document {
+  category: string;
+  questions: Questions[];
+}
+
+const quizSchema: Schema<quizDocument> = new mongoose.Schema({
   category: {
     type: String,
     required: true,
   },
   questions: [
     {
-      text: {
+      question: {
         type: String,
         required: true,
       },
@@ -20,5 +32,8 @@ const quizSchema = new mongoose.Schema({
   ],
 });
 
-const QUIZ = mongoose.model("quiz", quizSchema);
-export default QUIZ;
+const Quiz: Model<quizDocument> = mongoose.model<quizDocument>(
+  "quiz",
+  quizSchema
+);
+export default Quiz;

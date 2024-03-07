@@ -11,7 +11,7 @@ const quizSchema = new mongoose_1.default.Schema({
     },
     questions: [
         {
-            text: {
+            question: {
                 type: String,
                 required: true,
             },
@@ -23,5 +23,5 @@ const quizSchema = new mongoose_1.default.Schema({
         },
     ],
 });
-const QUIZ = mongoose_1.default.model("quiz", quizSchema);
-exports.default = QUIZ;
+const Quiz = mongoose_1.default.model("quiz", quizSchema);
+exports.default = Quiz;

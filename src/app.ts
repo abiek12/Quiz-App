@@ -20,6 +20,8 @@ mongoose
     console.log(err);
   });
 
+// Plugins
+
 // Routes
 app.register(routes, { prefix: "/api/quiz" });
 

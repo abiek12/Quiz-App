@@ -8,14 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.submitAnswer = exports.getQuestions = exports.getAllQuizes = exports.uploadQuestions = void 0;
+const quizModel_1 = __importDefault(require("../models/quizModel"));
 function uploadQuestions(req, replay) {
     return __awaiter(this, void 0, void 0, function* () {
-        const data = req.body;
-        if (!data) {
-            replay.code(400).send("Empty!");
+        try {
+            const { Category, Question, Options, Answer } = req.body;
+            if (!(Category && Question && Options && Answer)) {
+                replay.code(400).send("All Fields are compulsory!");
+            }
+            const existngCategory = yield quizModel_1.default.findOne({
+                category: Category,
+            });
+            if (typeof existngCategory == null) {
+                yield quizModel_1.default.create({
+                    category: Category,
+                    questions: [{ question: Question, options: Options, answer: Answer }],
+                });
+                replay.code(200).send("Succesfully uploaded");
+            }
         }
+        catch (error) { }
     });
 }
 exports.uploadQuestions = uploadQuestions;

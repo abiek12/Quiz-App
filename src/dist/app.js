@@ -20,6 +20,7 @@ mongoose
     .catch((err) => {
     console.log(err);
 });
+// Plugins
 // Routes
 app.register(routes_1.default, { prefix: "/api/quiz" });
 const PORT = process.env.PORT || 3000;
