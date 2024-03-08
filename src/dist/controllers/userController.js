@@ -19,7 +19,9 @@ function uploadQuestions(req, replay) {
         try {
             const { Category, Question, Options, Answer } = req.body;
             if (!(Category && Question && Options && Answer)) {
-                replay.code(400).send("All Fields are compulsory!");
+                replay
+                    .code(400)
+                    .send({ success: false, message: "All Fields are compulsory!" });
             }
             const existngCategory = yield quizModel_1.default.findOne({
                 category: Category,
@@ -29,11 +31,24 @@ function uploadQuestions(req, replay) {
                     category: Category,
                     questions: [{ question: Question, options: Options, answer: Answer }],
                 });
-                replay.code(200).send("Uploaded successfully");
+                replay
+                    .code(200)
+                    .send({ success: true, message: "Quiz uploaded successfully" });
             }
             else {
-                //   await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
-                replay.code(200).send("Question added successfully");
+                const existingQuestion = yield quizModel_1.default.findOne({
+                    questions: { $elemMatch: { question: Question } },
+                });
+                if (existingQuestion) {
+                    replay
+                        .code(403)
+                        .send({ success: false, message: "Question already Exist!" });
+                }
+                // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
+                replay.code(200).send({
+                    success: true,
+                    message: `Question added to ${existingQuestion === null || existingQuestion === void 0 ? void 0 : existingQuestion.category} successfully`,
+                });
             }
         }
         catch (error) { }

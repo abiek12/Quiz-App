@@ -26,21 +26,36 @@ export async function uploadQuestions(
 
     const { Category, Question, Options, Answer } = req.body as incomingData;
     if (!(Category && Question && Options && Answer)) {
-      replay.code(400).send("All Fields are compulsory!");
+      replay
+        .code(400)
+        .send({ success: false, message: "All Fields are compulsory!" });
     }
     const existngCategory: quizDocument | null = await Quiz.findOne({
       category: Category,
     });
 
-    if (existngCategory == null) {        
+    if (existngCategory == null) {
       await Quiz.create({
         category: Category,
         questions: [{ question: Question, options: Options, answer: Answer }],
       });
-      replay.code(200).send("Uploaded successfully");
+      replay
+        .code(200)
+        .send({ success: true, message: "Quiz uploaded successfully" });
     } else {
-      //   await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
-      replay.code(200).send("Question added successfully");
+      const existingQuestion: quizDocument | null = await Quiz.findOne({
+        questions: { $elemMatch: { question: Question } },
+      });
+      if (existingQuestion) {
+        replay
+          .code(403)
+          .send({ success: false, message: "Question already Exist!" });
+      }
+      // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
+      replay.code(200).send({
+        success: true,
+        message: `Question added to ${existingQuestion?.category} successfully`,
+      });
     }
   } catch (error) {}
 }
