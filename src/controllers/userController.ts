@@ -83,6 +83,18 @@ export async function uploadQuestions(
     });
   }
 }
-export async function getAllQuizes(req: FastifyRequest, reply: FastifyReply) {}
+
+export async function getAllQuizes(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const categories = await Quiz.find({}, { category: 1 });
+    return reply.code(200).send({ success: true, categories });
+  } catch (error) {
+    console.error("An error occurred:", error);
+    reply.code(500).send({
+      success: false,
+      message: "An error occurred while fetching categories",
+    });
+  }
+}
 export async function getQuestions(req: FastifyRequest, reply: FastifyReply) {}
 export async function submitAnswer(req: FastifyRequest, reply: FastifyReply) {}

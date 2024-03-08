@@ -78,7 +78,19 @@ function uploadQuestions(req, reply) {
 }
 exports.uploadQuestions = uploadQuestions;
 function getAllQuizes(req, reply) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const categories = yield quizModel_1.default.find({}, { category: 1 });
+            return reply.code(200).send({ success: true, categories });
+        }
+        catch (error) {
+            console.error("An error occurred:", error);
+            reply.code(500).send({
+                success: false,
+                message: "An error occurred while fetching categories",
+            });
+        }
+    });
 }
 exports.getAllQuizes = getAllQuizes;
 function getQuestions(req, reply) {
