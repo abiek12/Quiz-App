@@ -3,7 +3,7 @@ import Quiz from "../models/quizModel";
 
 export async function uploadQuestions(
   req: FastifyRequest,
-  replay: FastifyReply
+  reply: FastifyReply
 ) {
   try {
     type incomingData = {
@@ -26,7 +26,7 @@ export async function uploadQuestions(
 
     const { Category, Question, Options, Answer } = req.body as incomingData;
     if (!(Category && Question && Options && Answer)) {
-      replay
+      reply
         .code(400)
         .send({ success: false, message: "All Fields are compulsory!" });
     }
@@ -39,7 +39,7 @@ export async function uploadQuestions(
         category: Category,
         questions: [{ question: Question, options: Options, answer: Answer }],
       });
-      replay
+      reply
         .code(200)
         .send({ success: true, message: "Quiz uploaded successfully" });
     } else {
@@ -47,18 +47,22 @@ export async function uploadQuestions(
         questions: { $elemMatch: { question: Question } },
       });
       if (existingQuestion) {
-        replay
+        reply
           .code(403)
           .send({ success: false, message: "Question already Exist!" });
       }
       // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
-      replay.code(200).send({
+      reply.code(200).send({
         success: true,
-        message: `Question added to ${existingQuestion?.category} successfully`,
+        message: `Question added to ${existngCategory.category} Category successfully`,
       });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("An error occurred:", error);
+    reply.code(500).send({ success: false, message: 'An error occurred while uploading the quiz' });
+
+  }
 }
-export async function getAllQuizes(req: FastifyRequest, replay: FastifyReply) {}
-export async function getQuestions(req: FastifyRequest, replay: FastifyReply) {}
-export async function submitAnswer(req: FastifyRequest, replay: FastifyReply) {}
+export async function getAllQuizes(req: FastifyRequest, reply: FastifyReply) {}
+export async function getQuestions(req: FastifyRequest, reply: FastifyReply) {}
+export async function submitAnswer(req: FastifyRequest, reply: FastifyReply) {}

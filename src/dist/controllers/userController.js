@@ -14,12 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.submitAnswer = exports.getQuestions = exports.getAllQuizes = exports.uploadQuestions = void 0;
 const quizModel_1 = __importDefault(require("../models/quizModel"));
-function uploadQuestions(req, replay) {
+function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { Category, Question, Options, Answer } = req.body;
             if (!(Category && Question && Options && Answer)) {
-                replay
+                reply
                     .code(400)
                     .send({ success: false, message: "All Fields are compulsory!" });
             }
@@ -31,7 +31,7 @@ function uploadQuestions(req, replay) {
                     category: Category,
                     questions: [{ question: Question, options: Options, answer: Answer }],
                 });
-                replay
+                reply
                     .code(200)
                     .send({ success: true, message: "Quiz uploaded successfully" });
             }
@@ -40,30 +40,33 @@ function uploadQuestions(req, replay) {
                     questions: { $elemMatch: { question: Question } },
                 });
                 if (existingQuestion) {
-                    replay
+                    reply
                         .code(403)
                         .send({ success: false, message: "Question already Exist!" });
                 }
                 // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
-                replay.code(200).send({
+                reply.code(200).send({
                     success: true,
-                    message: `Question added to ${existingQuestion === null || existingQuestion === void 0 ? void 0 : existingQuestion.category} successfully`,
+                    message: `Question added to ${existngCategory.category} Category successfully`,
                 });
             }
         }
-        catch (error) { }
+        catch (error) {
+            console.error("An error occurred:", error);
+            reply.code(500).send({ success: false, message: 'An error occurred while uploading the quiz' });
+        }
     });
 }
 exports.uploadQuestions = uploadQuestions;
-function getAllQuizes(req, replay) {
+function getAllQuizes(req, reply) {
     return __awaiter(this, void 0, void 0, function* () { });
 }
 exports.getAllQuizes = getAllQuizes;
-function getQuestions(req, replay) {
+function getQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () { });
 }
 exports.getQuestions = getQuestions;
-function submitAnswer(req, replay) {
+function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () { });
 }
 exports.submitAnswer = submitAnswer;
