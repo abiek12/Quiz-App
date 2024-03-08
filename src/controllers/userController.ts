@@ -38,7 +38,6 @@ export async function uploadQuestions(
     const existngCategory: quizDocument | null = await Quiz.findOne({
       category: Category,
     });
-
     if (existngCategory == null) {
       await Quiz.create({
         category: Category,
@@ -56,7 +55,16 @@ export async function uploadQuestions(
           .code(403)
           .send({ success: false, message: "Question already Exist!" });
       }
-      // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
+      await Quiz.updateOne(
+        { category: existngCategory.category },
+        {
+          $push: {
+            questions: [
+              { question: Question, options: Options, answer: Answer },
+            ],
+          },
+        }
+      );
       return reply.code(200).send({
         success: true,
         message: `Question added to ${existngCategory.category} Category successfully`,

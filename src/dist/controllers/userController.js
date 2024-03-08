@@ -49,7 +49,13 @@ function uploadQuestions(req, reply) {
                         .code(403)
                         .send({ success: false, message: "Question already Exist!" });
                 }
-                // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
+                yield quizModel_1.default.updateOne({ category: existngCategory.category }, {
+                    $push: {
+                        questions: [
+                            { question: Question, options: Options, answer: Answer },
+                        ],
+                    },
+                });
                 return reply.code(200).send({
                     success: true,
                     message: `Question added to ${existngCategory.category} Category successfully`,
