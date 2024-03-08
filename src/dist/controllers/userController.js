@@ -17,12 +17,17 @@ const quizModel_1 = __importDefault(require("../models/quizModel"));
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { Category, Question, Options, Answer } = req.body;
+            let { Category, Question, Options, Answer } = req.body;
             if (!(Category && Question && Options && Answer)) {
                 return reply
                     .code(400)
                     .send({ success: false, message: "All Fields are compulsory!" });
             }
+            // Converting all data to lowercase
+            Category = Category.toLowerCase();
+            Question = Question.toLowerCase();
+            Options = Options.map((option) => option.toLowerCase());
+            Answer = Answer.toLowerCase();
             const existngCategory = yield quizModel_1.default.findOne({
                 category: Category,
             });
@@ -53,9 +58,7 @@ function uploadQuestions(req, reply) {
         }
         catch (error) {
             console.error("An error occurred:", error);
-            reply
-                .code(500)
-                .send({
+            reply.code(500).send({
                 success: false,
                 message: "An error occurred while uploading the quiz",
             });

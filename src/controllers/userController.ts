@@ -24,12 +24,17 @@ export async function uploadQuestions(
       ];
     };
 
-    const { Category, Question, Options, Answer } = req.body as incomingData;
+    let { Category, Question, Options, Answer } = req.body as incomingData;
     if (!(Category && Question && Options && Answer)) {
       return reply
         .code(400)
         .send({ success: false, message: "All Fields are compulsory!" });
     }
+    // Converting all data to lowercase
+    Category = Category.toLowerCase();
+    Question = Question.toLowerCase();
+    Options = Options.map((option) => option.toLowerCase());
+    Answer = Answer.toLowerCase();
     const existngCategory: quizDocument | null = await Quiz.findOne({
       category: Category,
     });
@@ -59,12 +64,10 @@ export async function uploadQuestions(
     }
   } catch (error) {
     console.error("An error occurred:", error);
-    reply
-      .code(500)
-      .send({
-        success: false,
-        message: "An error occurred while uploading the quiz",
-      });
+    reply.code(500).send({
+      success: false,
+      message: "An error occurred while uploading the quiz",
+    });
   }
 }
 export async function getAllQuizes(req: FastifyRequest, reply: FastifyReply) {}
