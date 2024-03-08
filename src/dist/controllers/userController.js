@@ -102,12 +102,13 @@ function getQuestions(req, reply) {
                 _id: categoryId,
             }, { questions: 1 });
             console.log(questions);
+            reply.code(200).send({ success: true, questions });
         }
         catch (error) {
             console.error("An error occurred:", error);
             reply.code(500).send({
                 success: false,
-                message: `An error occurred while fetching questions! ${error}`,
+                message: "An error occurred while fetching questions!",
             });
         }
     });
