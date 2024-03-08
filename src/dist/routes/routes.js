@@ -15,7 +15,7 @@ function routes(app) {
         // Upload Questions
         app.post("/upload", userController_1.uploadQuestions);
         // Get all quizes
-        app.get("/", userController_1.getAllQuizes);
+        app.get("/", userController_1.getAllQuizCategories);
         // Participate a quiz
         app.post("/:id", userController_1.getQuestions);
         // submit quizes

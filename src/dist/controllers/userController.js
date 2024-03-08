@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.submitAnswer = exports.getQuestions = exports.getAllQuizes = exports.uploadQuestions = void 0;
+exports.submitAnswer = exports.getQuestions = exports.getAllQuizCategories = exports.uploadQuestions = void 0;
 const quizModel_1 = __importDefault(require("../models/quizModel"));
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -77,7 +77,7 @@ function uploadQuestions(req, reply) {
     });
 }
 exports.uploadQuestions = uploadQuestions;
-function getAllQuizes(req, reply) {
+function getAllQuizCategories(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const categories = yield quizModel_1.default.find({}, { category: 1 });
@@ -92,9 +92,14 @@ function getAllQuizes(req, reply) {
         }
     });
 }
-exports.getAllQuizes = getAllQuizes;
+exports.getAllQuizCategories = getAllQuizCategories;
 function getQuestions(req, reply) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const categoryId = req.params.id;
+        }
+        catch (error) { }
+    });
 }
 exports.getQuestions = getQuestions;
 function submitAnswer(req, reply) {

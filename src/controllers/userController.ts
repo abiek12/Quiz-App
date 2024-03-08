@@ -1,29 +1,33 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import Quiz from "../models/quizModel";
 
+type incomingData = {
+  Category: string;
+  Question: string;
+  Options: string[];
+  Answer: string;
+};
+
+type quizDocument = {
+  category: string;
+  questions: [
+    {
+      question: string;
+      options: string[];
+      answer: string;
+    }
+  ];
+};
+
+type paramsType = {
+  id: string;
+};
+
 export async function uploadQuestions(
   req: FastifyRequest,
   reply: FastifyReply
 ) {
   try {
-    type incomingData = {
-      Category: string;
-      Question: string;
-      Options: string[];
-      Answer: string;
-    };
-
-    type quizDocument = {
-      category: string;
-      questions: [
-        {
-          question: string;
-          options: string[];
-          answer: string;
-        }
-      ];
-    };
-
     let { Category, Question, Options, Answer } = req.body as incomingData;
     // Checking all data is there
     if (!(Category && Question && Options && Answer)) {
@@ -84,7 +88,10 @@ export async function uploadQuestions(
   }
 }
 
-export async function getAllQuizes(req: FastifyRequest, reply: FastifyReply) {
+export async function getAllQuizCategories(
+  req: FastifyRequest,
+  reply: FastifyReply
+) {
   try {
     const categories = await Quiz.find({}, { category: 1 });
     return reply.code(200).send({ success: true, categories });
@@ -96,5 +103,13 @@ export async function getAllQuizes(req: FastifyRequest, reply: FastifyReply) {
     });
   }
 }
-export async function getQuestions(req: FastifyRequest, reply: FastifyReply) {}
+
+export async function getQuestions(
+  req: FastifyRequest<{ Params: paramsType }>,
+  reply: FastifyReply
+) {
+  try {
+    const categoryId: string = req.params.id;
+  } catch (error) {}
+}
 export async function submitAnswer(req: FastifyRequest, reply: FastifyReply) {}
