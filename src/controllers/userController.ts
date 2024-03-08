@@ -26,7 +26,7 @@ export async function uploadQuestions(
 
     const { Category, Question, Options, Answer } = req.body as incomingData;
     if (!(Category && Question && Options && Answer)) {
-      reply
+      return reply
         .code(400)
         .send({ success: false, message: "All Fields are compulsory!" });
     }
@@ -39,7 +39,7 @@ export async function uploadQuestions(
         category: Category,
         questions: [{ question: Question, options: Options, answer: Answer }],
       });
-      reply
+      return reply
         .code(200)
         .send({ success: true, message: "Quiz uploaded successfully" });
     } else {
@@ -47,20 +47,24 @@ export async function uploadQuestions(
         questions: { $elemMatch: { question: Question } },
       });
       if (existingQuestion) {
-        reply
+        return reply
           .code(403)
           .send({ success: false, message: "Question already Exist!" });
       }
       // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
-      reply.code(200).send({
+      return reply.code(200).send({
         success: true,
         message: `Question added to ${existngCategory.category} Category successfully`,
       });
     }
   } catch (error) {
     console.error("An error occurred:", error);
-    reply.code(500).send({ success: false, message: 'An error occurred while uploading the quiz' });
-
+    reply
+      .code(500)
+      .send({
+        success: false,
+        message: "An error occurred while uploading the quiz",
+      });
   }
 }
 export async function getAllQuizes(req: FastifyRequest, reply: FastifyReply) {}

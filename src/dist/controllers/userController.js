@@ -19,7 +19,7 @@ function uploadQuestions(req, reply) {
         try {
             const { Category, Question, Options, Answer } = req.body;
             if (!(Category && Question && Options && Answer)) {
-                reply
+                return reply
                     .code(400)
                     .send({ success: false, message: "All Fields are compulsory!" });
             }
@@ -31,7 +31,7 @@ function uploadQuestions(req, reply) {
                     category: Category,
                     questions: [{ question: Question, options: Options, answer: Answer }],
                 });
-                reply
+                return reply
                     .code(200)
                     .send({ success: true, message: "Quiz uploaded successfully" });
             }
@@ -40,12 +40,12 @@ function uploadQuestions(req, reply) {
                     questions: { $elemMatch: { question: Question } },
                 });
                 if (existingQuestion) {
-                    reply
+                    return reply
                         .code(403)
                         .send({ success: false, message: "Question already Exist!" });
                 }
                 // await existngCategory?.questions.push(...[{ Question, Options, Answer }]);
-                reply.code(200).send({
+                return reply.code(200).send({
                     success: true,
                     message: `Question added to ${existngCategory.category} Category successfully`,
                 });
@@ -53,7 +53,12 @@ function uploadQuestions(req, reply) {
         }
         catch (error) {
             console.error("An error occurred:", error);
-            reply.code(500).send({ success: false, message: 'An error occurred while uploading the quiz' });
+            reply
+                .code(500)
+                .send({
+                success: false,
+                message: "An error occurred while uploading the quiz",
+            });
         }
     });
 }
