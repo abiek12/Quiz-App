@@ -18,6 +18,7 @@ function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let { Category, Question, Options, Answer } = req.body;
+            // Checking all data is there
             if (!(Category && Question && Options && Answer)) {
                 return reply
                     .code(400)
@@ -28,9 +29,11 @@ function uploadQuestions(req, reply) {
             Question = Question.toLowerCase();
             Options = Options.map((option) => option.toLowerCase());
             Answer = Answer.toLowerCase();
+            // checking incoming question category allready exist
             const existngCategory = yield quizModel_1.default.findOne({
                 category: Category,
             });
+            // Creating a new category
             if (existngCategory == null) {
                 yield quizModel_1.default.create({
                     category: Category,
@@ -41,6 +44,7 @@ function uploadQuestions(req, reply) {
                     .send({ success: true, message: "Quiz uploaded successfully" });
             }
             else {
+                // checking incoming question is already exist
                 const existingQuestion = yield quizModel_1.default.findOne({
                     questions: { $elemMatch: { question: Question } },
                 });
@@ -49,6 +53,7 @@ function uploadQuestions(req, reply) {
                         .code(403)
                         .send({ success: false, message: "Question already Exist!" });
                 }
+                // pushing new questions to corresponding category
                 yield quizModel_1.default.updateOne({ category: existngCategory.category }, {
                     $push: {
                         questions: [

@@ -25,6 +25,7 @@ export async function uploadQuestions(
     };
 
     let { Category, Question, Options, Answer } = req.body as incomingData;
+    // Checking all data is there
     if (!(Category && Question && Options && Answer)) {
       return reply
         .code(400)
@@ -35,9 +36,11 @@ export async function uploadQuestions(
     Question = Question.toLowerCase();
     Options = Options.map((option) => option.toLowerCase());
     Answer = Answer.toLowerCase();
+    // checking incoming question category allready exist
     const existngCategory: quizDocument | null = await Quiz.findOne({
       category: Category,
     });
+    // Creating a new category
     if (existngCategory == null) {
       await Quiz.create({
         category: Category,
@@ -47,6 +50,7 @@ export async function uploadQuestions(
         .code(200)
         .send({ success: true, message: "Quiz uploaded successfully" });
     } else {
+      // checking incoming question is already exist
       const existingQuestion: quizDocument | null = await Quiz.findOne({
         questions: { $elemMatch: { question: Question } },
       });
@@ -55,6 +59,7 @@ export async function uploadQuestions(
           .code(403)
           .send({ success: false, message: "Question already Exist!" });
       }
+      // pushing new questions to corresponding category
       await Quiz.updateOne(
         { category: existngCategory.category },
         {
