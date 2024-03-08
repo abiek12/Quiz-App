@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.submitAnswer = exports.getQuestions = exports.getAllQuizCategories = exports.uploadQuestions = void 0;
 const quizModel_1 = __importDefault(require("../models/quizModel"));
+const mongoose_1 = __importDefault(require("mongoose"));
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -96,9 +97,19 @@ exports.getAllQuizCategories = getAllQuizCategories;
 function getQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const categoryId = req.params.id;
+            const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            const questions = yield quizModel_1.default.findById({
+                _id: categoryId,
+            }, { questions: 1 });
+            console.log(questions);
         }
-        catch (error) { }
+        catch (error) {
+            console.error("An error occurred:", error);
+            reply.code(500).send({
+                success: false,
+                message: `An error occurred while fetching questions! ${error}`,
+            });
+        }
     });
 }
 exports.getQuestions = getQuestions;

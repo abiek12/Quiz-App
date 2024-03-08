@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import Quiz from "../models/quizModel";
+import mongoose from "mongoose";
 
 type incomingData = {
   Category: string;
@@ -17,6 +18,12 @@ type quizDocument = {
       answer: string;
     }
   ];
+};
+
+type questionsType = {
+  question: string;
+  options: string[];
+  answer: string;
 };
 
 type paramsType = {
@@ -109,7 +116,22 @@ export async function getQuestions(
   reply: FastifyReply
 ) {
   try {
-    const categoryId: string = req.params.id;
-  } catch (error) {}
+    const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
+      req.params.id
+    );
+    const questions: questionsType | null = await Quiz.findById(
+      {
+        _id: categoryId,
+      },
+      { questions: 1 }
+    );
+    console.log(questions);
+  } catch (error) {
+    console.error("An error occurred:", error);
+    reply.code(500).send({
+      success: false,
+      message: `An error occurred while fetching questions! ${error}`,
+    });
+  }
 }
 export async function submitAnswer(req: FastifyRequest, reply: FastifyReply) {}
