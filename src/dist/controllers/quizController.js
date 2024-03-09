@@ -81,6 +81,7 @@ exports.uploadQuestions = uploadQuestions;
 function getAllQuizCategories(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            // Retreiving categories from the db
             const categories = yield quizModel_1.default.find({}, { category: 1 });
             return reply.code(200).send({ success: true, categories });
         }
@@ -97,11 +98,12 @@ exports.getAllQuizCategories = getAllQuizCategories;
 function getQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            // Retrieving questions based on the category id
             const questions = yield quizModel_1.default.findById({
                 _id: categoryId,
             }, { questions: 1 });
-            console.log(questions);
             reply.code(200).send({ success: true, questions });
         }
         catch (error) {

@@ -100,6 +100,7 @@ export async function getAllQuizCategories(
   reply: FastifyReply
 ) {
   try {
+    // Retreiving categories from the db
     const categories = await Quiz.find({}, { category: 1 });
     return reply.code(200).send({ success: true, categories });
   } catch (error) {
@@ -116,16 +117,17 @@ export async function getQuestions(
   reply: FastifyReply
 ) {
   try {
+    // Converting the id from params into object id
     const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
     );
+    // Retrieving questions based on the category id
     const questions: questionsType | null = await Quiz.findById(
       {
         _id: categoryId,
       },
       { questions: 1 }
     );
-    console.log(questions);
     reply.code(200).send({ success: true, questions });
   } catch (error) {
     console.error("An error occurred:", error);
