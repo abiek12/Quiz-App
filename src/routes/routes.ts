@@ -11,7 +11,7 @@ async function routes(app: FastifyInstance) {
   // Get all quizes
   app.get("/", getAllQuizCategories);
   // Participate a quiz
-  app.post("/:id", getQuestions);
+  app.get("/:id", getQuestions);
   // submit quizes
   app.post("/:id/submit", submitAnswer);
 }

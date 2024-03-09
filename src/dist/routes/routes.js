@@ -17,7 +17,7 @@ function routes(app) {
         // Get all quizes
         app.get("/", quizController_1.getAllQuizCategories);
         // Participate a quiz
-        app.post("/:id", quizController_1.getQuestions);
+        app.get("/:id", quizController_1.getQuestions);
         // submit quizes
         app.post("/:id/submit", quizController_1.submitAnswer);
     });

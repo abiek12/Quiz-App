@@ -3,7 +3,7 @@ import { Document, Schema, Model } from "mongoose";
 
 interface Questions {
   question: string;
-  options: String[];
+  options: string[];
   answer: string;
 }
 
