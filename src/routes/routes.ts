@@ -4,7 +4,7 @@ import {
   getAllQuizCategories,
   getQuestions,
   submitAnswer,
-} from "../controllers/userController";
+} from "../controllers/quizController";
 async function routes(app: FastifyInstance) {
   // Upload Questions
   app.post("/upload", uploadQuestions);

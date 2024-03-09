@@ -9,17 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const userController_1 = require("../controllers/userController");
+const quizController_1 = require("../controllers/quizController");
 function routes(app) {
     return __awaiter(this, void 0, void 0, function* () {
         // Upload Questions
-        app.post("/upload", userController_1.uploadQuestions);
+        app.post("/upload", quizController_1.uploadQuestions);
         // Get all quizes
-        app.get("/", userController_1.getAllQuizCategories);
+        app.get("/", quizController_1.getAllQuizCategories);
         // Participate a quiz
-        app.post("/:id", userController_1.getQuestions);
+        app.post("/:id", quizController_1.getQuestions);
         // submit quizes
-        app.post("/:id/submit", userController_1.submitAnswer);
+        app.post("/:id/submit", quizController_1.submitAnswer);
     });
 }
 exports.default = routes;
