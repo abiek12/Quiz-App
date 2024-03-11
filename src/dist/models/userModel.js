@@ -5,6 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const mongoose_2 = require("mongoose");
+const categoryScoreSchema = new mongoose_2.Schema({
+    category: {
+        type: String,
+        required: true,
+    },
+    score: {
+        type: Number,
+        required: true,
+        default: 0, // Default score of 0 for each category
+    },
+});
 const userSchema = new mongoose_2.Schema({
     name: {
         type: String,
