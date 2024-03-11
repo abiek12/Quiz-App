@@ -119,18 +119,21 @@ exports.getQuestions = getQuestions;
 function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { Question, SelectedOption } = req.body;
+            let { Question, SelectedOption } = req.body;
+            Question = Question.toLowerCase();
+            SelectedOption = SelectedOption.toLowerCase();
             // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
             // Retrieve the answerData based on the category ID
             const answerData = yield quizModel_1.default.findById(categoryId);
             if (answerData) {
                 // Find the matched question in the answerData
-                const matchedQuestion = answerData.questions.find((question) => question.question === Question.toLowerCase());
+                const matchedQuestion = answerData.questions.find((questions) => questions.question === Question);
                 if (matchedQuestion) {
                     // Check if the submitted answer matches the correct answer for the matched question
-                    const correctAnswer = matchedQuestion.answer.toLowerCase();
-                    const isCorrect = SelectedOption.toLowerCase() === correctAnswer;
+                    const correctAnswer = matchedQuestion.answer;
+                    // Comparing the selected option and correct answer
+                    const isCorrect = SelectedOption === correctAnswer;
                     reply.code(200).send({ isCorrect });
                 }
                 else {

@@ -147,7 +147,9 @@ export async function submitAnswer(
   reply: FastifyReply
 ) {
   try {
-    const { Question, SelectedOption } = req.body as AnswerSubmitType;
+    let { Question, SelectedOption } = req.body as AnswerSubmitType;
+    Question = Question.toLowerCase();
+    SelectedOption = SelectedOption.toLowerCase();
     // Converting the id from params into object id
     const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
@@ -157,13 +159,13 @@ export async function submitAnswer(
     if (answerData) {
       // Find the matched question in the answerData
       const matchedQuestion = answerData.questions.find(
-        (question) => question.question === Question.toLowerCase()
+        (questions) => questions.question === Question
       );
       if (matchedQuestion) {
         // Check if the submitted answer matches the correct answer for the matched question
-        const correctAnswer: string = matchedQuestion.answer.toLowerCase();
-        const isCorrect: boolean =
-          SelectedOption.toLowerCase() === correctAnswer;
+        const correctAnswer: string = matchedQuestion.answer;
+        // Comparing the selected option and correct answer
+        const isCorrect: boolean = SelectedOption === correctAnswer;
         reply.code(200).send({ isCorrect });
       } else {
         // If no matching question is found, send an appropriate error response
