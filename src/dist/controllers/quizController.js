@@ -119,9 +119,25 @@ exports.getQuestions = getQuestions;
 function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const { selectedOption } = req.body;
+            const { Question, SelectedOption } = req.body;
             // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            // Retrieve the answerData based on the category ID
+            const answerData = yield quizModel_1.default.findById(categoryId);
+            if (answerData) {
+                // Find the matched question in the answerData
+                const matchedQuestion = answerData.questions.find((question) => question.question === Question.toLowerCase());
+                if (matchedQuestion) {
+                    // Check if the submitted answer matches the correct answer for the matched question
+                    const correctAnswer = matchedQuestion.answer.toLowerCase();
+                    const isCorrect = SelectedOption.toLowerCase() === correctAnswer;
+                    reply.code(200).send({ isCorrect });
+                }
+                else {
+                    // If no matching question is found, send an appropriate error response
+                    reply.code(404).send({ success: false, message: "Question not found" });
+                }
+            }
         }
         catch (error) {
             console.error("An error occurred:", error);

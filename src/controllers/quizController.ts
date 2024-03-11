@@ -2,14 +2,14 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import Quiz from "../models/quizModel";
 import mongoose from "mongoose";
 
-type incomingData = {
+type IncomingData = {
   Category: string;
   Question: string;
   Options: string[];
   Answer: string;
 };
 
-type quizDocument = {
+type QuizDocument = {
   category: string;
   questions: [
     {
@@ -20,14 +20,19 @@ type quizDocument = {
   ];
 };
 
-type questionsType = {
+type QuestionsType = {
   question: string;
   options: string[];
   answer: string;
 };
 
-type paramsType = {
+type ParamsType = {
   id: string;
+};
+
+type AnswerSubmitType = {
+  Question: string;
+  SelectedOption: string;
 };
 
 export async function uploadQuestions(
@@ -35,7 +40,7 @@ export async function uploadQuestions(
   reply: FastifyReply
 ) {
   try {
-    let { Category, Question, Options, Answer } = req.body as incomingData;
+    let { Category, Question, Options, Answer } = req.body as IncomingData;
     // Checking all data is there
     if (!(Category && Question && Options && Answer)) {
       return reply
@@ -48,7 +53,7 @@ export async function uploadQuestions(
     Options = Options.map((option) => option.toLowerCase());
     Answer = Answer.toLowerCase();
     // checking incoming question category allready exist
-    const existngCategory: quizDocument | null = await Quiz.findOne({
+    const existngCategory: QuizDocument | null = await Quiz.findOne({
       category: Category,
     });
     // Creating a new category
@@ -62,7 +67,7 @@ export async function uploadQuestions(
         .send({ success: true, message: "Quiz uploaded successfully" });
     } else {
       // checking incoming question is already exist
-      const existingQuestion: quizDocument | null = await Quiz.findOne({
+      const existingQuestion: QuizDocument | null = await Quiz.findOne({
         questions: { $elemMatch: { question: Question } },
       });
       if (existingQuestion) {
@@ -113,7 +118,7 @@ export async function getAllQuizCategories(
 }
 
 export async function getQuestions(
-  req: FastifyRequest<{ Params: paramsType }>,
+  req: FastifyRequest<{ Params: ParamsType }>,
   reply: FastifyReply
 ) {
   try {
@@ -122,7 +127,7 @@ export async function getQuestions(
       req.params.id
     );
     // Retrieving questions based on the category id
-    const questions: questionsType | null = await Quiz.findById(
+    const questions: QuestionsType | null = await Quiz.findById(
       {
         _id: categoryId,
       },
@@ -138,15 +143,33 @@ export async function getQuestions(
   }
 }
 export async function submitAnswer(
-  req: FastifyRequest<{ Params: paramsType }>,
+  req: FastifyRequest<{ Params: ParamsType }>,
   reply: FastifyReply
 ) {
   try {
-    const { selectedOption } = req.body as { selectedOption: string };
+    const { Question, SelectedOption } = req.body as AnswerSubmitType;
     // Converting the id from params into object id
     const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
     );
+    // Retrieve the answerData based on the category ID
+    const answerData: QuizDocument | null = await Quiz.findById(categoryId);
+    if (answerData) {
+      // Find the matched question in the answerData
+      const matchedQuestion = answerData.questions.find(
+        (question) => question.question === Question.toLowerCase()
+      );
+      if (matchedQuestion) {
+        // Check if the submitted answer matches the correct answer for the matched question
+        const correctAnswer: string = matchedQuestion.answer.toLowerCase();
+        const isCorrect: boolean =
+          SelectedOption.toLowerCase() === correctAnswer;
+        reply.code(200).send({ isCorrect });
+      } else {
+        // If no matching question is found, send an appropriate error response
+        reply.code(404).send({ success: false, message: "Question not found" });
+      }
+    }
   } catch (error) {
     console.error("An error occurred:", error);
     reply.code(500).send({
