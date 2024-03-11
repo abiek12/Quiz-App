@@ -10,10 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const quizController_1 = require("../controllers/quizController");
+const userController_1 = require("../controllers/userController");
 function routes(app) {
     return __awaiter(this, void 0, void 0, function* () {
         // Upload Questions
         app.post("/upload", quizController_1.uploadQuestions);
+        // User Signup
+        app.post("/signup", userController_1.signUp);
+        // User Login
+        app.post("/login", userController_1.login);
         // Get all quizes
         app.get("/", quizController_1.getAllQuizCategories);
         // Participate a quiz
