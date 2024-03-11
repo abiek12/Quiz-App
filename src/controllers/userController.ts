@@ -3,7 +3,7 @@ import User from "../models/userModel";
 import bcrypt from "bcrypt";
 
 type UserSignUpDataType = {
-  Username: string;
+  Username?: string;
   Email: string;
   Password: string;
 };
@@ -41,4 +41,19 @@ export async function signUp(req: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export async function login(req: FastifyRequest, reply: FastifyReply) {}
+export async function login(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const { Email, Password } = req.body as UserSignUpDataType;
+    if (!(Email && Password)) {
+      return reply
+        .code(400)
+        .send({ success: false, message: "All fields are compulsorry!" });
+    }
+  } catch (error) {
+    console.error("An error occurred:", error);
+    reply.code(500).send({
+      success: false,
+      message: "An error occurred while user login!",
+    });
+  }
+}

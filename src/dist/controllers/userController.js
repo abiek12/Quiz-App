@@ -53,6 +53,22 @@ function signUp(req, reply) {
 }
 exports.signUp = signUp;
 function login(req, reply) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { Email, Password } = req.body;
+            if (!(Email && Password)) {
+                return reply
+                    .code(400)
+                    .send({ success: false, message: "All fields are compulsorry!" });
+            }
+        }
+        catch (error) {
+            console.error("An error occurred:", error);
+            reply.code(500).send({
+                success: false,
+                message: "An error occurred while user login!",
+            });
+        }
+    });
 }
 exports.login = login;
