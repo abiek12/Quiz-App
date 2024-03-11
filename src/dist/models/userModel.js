@@ -17,9 +17,14 @@ const categoryScoreSchema = new mongoose_2.Schema({
     },
 });
 const userSchema = new mongoose_2.Schema({
-    name: {
+    userName: {
         type: String,
         required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
     },
     password: {
         type: String,
@@ -28,3 +33,4 @@ const userSchema = new mongoose_2.Schema({
     categoryScores: [categoryScoreSchema],
 });
 const User = mongoose_1.default.model("users", userSchema);
+exports.default = User;
