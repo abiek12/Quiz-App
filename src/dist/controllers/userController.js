@@ -61,12 +61,33 @@ function login(req, reply) {
                     .code(400)
                     .send({ success: false, message: "All fields are compulsorry!" });
             }
+            // finding user from the mongodb
+            const user = yield userModel_1.default.findOne({ email: Email });
+            if (!user) {
+                return reply
+                    .code(404)
+                    .send({ success: false, message: "User Not Found!" });
+            }
+            else {
+                // Password Matching
+                const passwordMatch = yield bcrypt_1.default.compare(Password, user.password);
+                if (!passwordMatch) {
+                    return reply
+                        .code(401)
+                        .send({ success: false, message: "Authentication Failed!" });
+                }
+                else {
+                    return reply
+                        .code(200)
+                        .send({ success: true, message: "Signed in Succesfully" });
+                }
+            }
         }
         catch (error) {
             console.error("An error occurred:", error);
             reply.code(500).send({
                 success: false,
-                message: "An error occurred while user login!",
+                message: `An error occurred while user login! ${error}`,
             });
         }
     });

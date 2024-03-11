@@ -10,9 +10,9 @@ async function routes(app: FastifyInstance) {
   // Upload Questions
   app.post("/upload", uploadQuestions);
   // User Signup
-  app.post("/signup", signUp);
+  app.post("/user/signup", signUp);
   // User Login
-  app.post("/login", login);
+  app.post("/user/login", login);
   // Get all quizes
   app.get("/", getAllQuizCategories);
   // Participate a quiz
