@@ -8,7 +8,6 @@ interface CategoryScore {
 
 interface UserDocument extends Document {
   name: string;
-  email: string;
   password: string;
   categoryScores: CategoryScore[];
 }
@@ -25,12 +24,8 @@ const categoryScoreSchema = new Schema<CategoryScore>({
   },
 });
 
-const userSchema = new Schema({
+const userSchema = new Schema<UserDocument>({
   name: {
-    type: String,
-    required: true,
-  },
-  email: {
     type: String,
     required: true,
   },
@@ -38,6 +33,7 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  categoryScores: [categoryScoreSchema],
 });
 
-const User = mongoose.model("users", userSchema);
+const User = mongoose.model<UserDocument>("users", userSchema);

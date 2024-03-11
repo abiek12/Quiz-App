@@ -21,13 +21,10 @@ const userSchema = new mongoose_2.Schema({
         type: String,
         required: true,
     },
-    email: {
-        type: String,
-        required: true,
-    },
     password: {
         type: String,
         required: true,
     },
+    categoryScores: [categoryScoreSchema],
 });
 const User = mongoose_1.default.model("users", userSchema);
