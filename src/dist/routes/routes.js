@@ -19,7 +19,7 @@ function routes(app) {
         // Participate a quiz
         app.get("/:id", quizController_1.getQuestions);
         // submit quizes
-        app.post("/:id/submit", quizController_1.submitAnswer);
+        app.post("/submit/:id", quizController_1.submitAnswer);
     });
 }
 exports.default = routes;

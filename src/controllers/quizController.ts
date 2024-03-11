@@ -137,4 +137,21 @@ export async function getQuestions(
     });
   }
 }
-export async function submitAnswer(req: FastifyRequest, reply: FastifyReply) {}
+export async function submitAnswer(
+  req: FastifyRequest<{ Params: paramsType }>,
+  reply: FastifyReply
+) {
+  try {
+    const { selectedOption } = req.body as { selectedOption: string };
+    // Converting the id from params into object id
+    const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
+      req.params.id
+    );
+  } catch (error) {
+    console.error("An error occurred:", error);
+    reply.code(500).send({
+      success: false,
+      message: "An error occurred while submitting answer!",
+    });
+  }
+}

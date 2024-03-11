@@ -13,7 +13,7 @@ async function routes(app: FastifyInstance) {
   // Participate a quiz
   app.get("/:id", getQuestions);
   // submit quizes
-  app.post("/:id/submit", submitAnswer);
+  app.post("/submit/:id", submitAnswer);
 }
 
 export default routes;

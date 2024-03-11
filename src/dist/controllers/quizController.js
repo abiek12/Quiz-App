@@ -117,6 +117,19 @@ function getQuestions(req, reply) {
 }
 exports.getQuestions = getQuestions;
 function submitAnswer(req, reply) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { selectedOption } = req.body;
+            // Converting the id from params into object id
+            const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
+        }
+        catch (error) {
+            console.error("An error occurred:", error);
+            reply.code(500).send({
+                success: false,
+                message: "An error occurred while submitting answer!",
+            });
+        }
+    });
 }
 exports.submitAnswer = submitAnswer;
