@@ -1,41 +1,25 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { Document, Schema, Model } from "mongoose";
+import Quest from "./questionModel";
 
-interface Questions {
-  question: string;
-  options: string[];
-  answer: string;
-}
-
-interface quizDocument extends Document {
+interface QuizDocument extends Document {
   category: string;
-  questions: Questions[];
+  questions: ObjectId;
 }
 
-const quizSchema: Schema<quizDocument> = new mongoose.Schema({
+const quizSchema: Schema<QuizDocument> = new mongoose.Schema({
   category: {
     type: String,
     required: [true, "Please provide category!"],
   },
-  questions: [
-    {
-      question: {
-        type: String,
-        required: [true, "Please provide question!"],
-      },
-      options: {
-        type: [String],
-        required: [true, "Please provide options!"],
-      },
-      answer: {
-        type: String,
-        required: [true, "Please provide answer!"],
-      },
-    },
-  ],
+  questions: {
+    type: mongoose.Types.ObjectId,
+    ref: "Quest",
+    required: true,
+  },
 });
 
-const Quiz: Model<quizDocument> = mongoose.model<quizDocument>(
+const Quiz: Model<QuizDocument> = mongoose.model<QuizDocument>(
   "quiz",
   quizSchema
 );

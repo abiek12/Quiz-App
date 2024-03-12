@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import Quiz from "../models/quizModel";
+import Quest from "../models/questionModel";
 import mongoose from "mongoose";
 
 type IncomingData = {
