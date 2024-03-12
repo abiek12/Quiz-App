@@ -169,14 +169,21 @@ export async function submitAnswer(
         reply.code(200).send({ isCorrect });
       } else {
         // If no matching question is found, send an appropriate error response
-        reply.code(404).send({ success: false, message: "Question not found" });
+        reply
+          .code(404)
+          .send({ success: false, message: "Question not found/Incorrect!" });
       }
+    } else {
+      // If no matching category is found, send an appropriate error response
+      reply
+        .code(404)
+        .send({ success: false, message: "Category not found/Incorrect!" });
     }
   } catch (error) {
     console.error("An error occurred:", error);
     reply.code(500).send({
       success: false,
-      message: "An error occurred while submitting answer!",
+      message: `An error occurred while submitting answer!, ${error}`,
     });
   }
 }

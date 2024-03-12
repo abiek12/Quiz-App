@@ -15,18 +15,21 @@ interface quizDocument extends Document {
 const quizSchema: Schema<quizDocument> = new mongoose.Schema({
   category: {
     type: String,
-    required: true,
+    required: [true, "Please provide category!"],
   },
   questions: [
     {
       question: {
         type: String,
-        required: true,
+        required: [true, "Please provide question!"],
       },
-      options: [String],
+      options: {
+        type: [String],
+        required: [true, "Please provide options!"],
+      },
       answer: {
         type: String,
-        required: true,
+        required: [true, "Please provide answer!"],
       },
     },
   ],
