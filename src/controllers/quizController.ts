@@ -21,12 +21,6 @@ type QuizDocument = {
   ];
 };
 
-type QuestionsType = {
-  question: string;
-  options: string[];
-  answer: string;
-};
-
 type ParamsType = {
   id: string;
 };
@@ -139,10 +133,10 @@ export async function getQuestions(
       req.params.id
     );
     // Retrieving questions based on the category id by populating
-    const categoryDetails: QuestionsType | null = await Quiz.findById({
+    const questionDetail: QuizDocument | null = await Quiz.findById({
       _id: categoryId,
     }).populate("questions");
-    return reply.code(200).send({ success: true, categoryDetails });
+    return reply.code(200).send({ success: true, questionDetail });
   } catch (error) {
     console.error("An error occurred:", error);
     reply.code(500).send({
@@ -164,7 +158,9 @@ export async function submitAnswer(
       req.params.id
     );
     // Retrieve the answerData based on the category ID
-    const answerData: QuizDocument | null = await Quiz.findById(categoryId);
+    const answerData: QuizDocument | null = await Quiz.findById(
+      categoryId
+    ).populate("questions");
     if (answerData) {
       // Find the matched question in the answerData
       const matchedQuestion = answerData.questions.find(
@@ -175,16 +171,16 @@ export async function submitAnswer(
         const correctAnswer: string = matchedQuestion.answer;
         // Comparing the selected option and correct answer
         const isCorrect: boolean = SelectedOption === correctAnswer;
-        reply.code(200).send({ isCorrect });
+        return reply.code(200).send({ isCorrect });
       } else {
         // If no matching question is found, send an appropriate error response
-        reply
+        return reply
           .code(404)
           .send({ success: false, message: "Question not found/Incorrect!" });
       }
     } else {
       // If no matching category is found, send an appropriate error response
-      reply
+      return reply
         .code(404)
         .send({ success: false, message: "Category not found/Incorrect!" });
     }

@@ -110,10 +110,10 @@ function getQuestions(req, reply) {
             // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
             // Retrieving questions based on the category id by populating
-            const categoryDetails = yield quizModel_1.default.findById({
+            const questionDetail = yield quizModel_1.default.findById({
                 _id: categoryId,
             }).populate("questions");
-            return reply.code(200).send({ success: true, categoryDetails });
+            return reply.code(200).send({ success: true, questionDetail });
         }
         catch (error) {
             console.error("An error occurred:", error);
@@ -134,7 +134,7 @@ function submitAnswer(req, reply) {
             // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
             // Retrieve the answerData based on the category ID
-            const answerData = yield quizModel_1.default.findById(categoryId);
+            const answerData = yield quizModel_1.default.findById(categoryId).populate("questions");
             if (answerData) {
                 // Find the matched question in the answerData
                 const matchedQuestion = answerData.questions.find((questions) => questions.question === Question);
@@ -143,18 +143,18 @@ function submitAnswer(req, reply) {
                     const correctAnswer = matchedQuestion.answer;
                     // Comparing the selected option and correct answer
                     const isCorrect = SelectedOption === correctAnswer;
-                    reply.code(200).send({ isCorrect });
+                    return reply.code(200).send({ isCorrect });
                 }
                 else {
                     // If no matching question is found, send an appropriate error response
-                    reply
+                    return reply
                         .code(404)
                         .send({ success: false, message: "Question not found/Incorrect!" });
                 }
             }
             else {
                 // If no matching category is found, send an appropriate error response
-                reply
+                return reply
                     .code(404)
                     .send({ success: false, message: "Category not found/Incorrect!" });
             }
