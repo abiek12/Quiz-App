@@ -36,6 +36,7 @@ type AnswerSubmitType = {
   SelectedOption: string;
 };
 
+// Upload Questions handler
 export async function uploadQuestions(
   req: FastifyRequest,
   reply: FastifyReply
@@ -109,6 +110,7 @@ export async function uploadQuestions(
   }
 }
 
+// Get All Category Handlers
 export async function getAllQuizCategories(
   req: FastifyRequest,
   reply: FastifyReply
@@ -126,6 +128,7 @@ export async function getAllQuizCategories(
   }
 }
 
+// Get all Questions Handler
 export async function getQuestions(
   req: FastifyRequest<{ Params: ParamsType }>,
   reply: FastifyReply
@@ -135,14 +138,11 @@ export async function getQuestions(
     const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
     );
-    // Retrieving questions based on the category id
-    const questions: QuestionsType | null = await Quiz.findById(
-      {
-        _id: categoryId,
-      },
-      { questions: 1 }
-    );
-    reply.code(200).send({ success: true, questions });
+    // Retrieving questions based on the category id by populating
+    const categoryDetails: QuestionsType | null = await Quiz.findById({
+      _id: categoryId,
+    }).populate("questions");
+    return reply.code(200).send({ success: true, categoryDetails });
   } catch (error) {
     console.error("An error occurred:", error);
     reply.code(500).send({

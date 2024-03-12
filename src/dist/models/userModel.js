@@ -5,10 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const mongoose_2 = require("mongoose");
+const questionModel_1 = __importDefault(require("./questionModel"));
 const QuestionAndSelectedOptSchema = new mongoose_2.Schema({
     questionId: {
         type: mongoose_1.default.Types.ObjectId,
-        ref: "Quest",
+        ref: questionModel_1.default,
         required: true,
     },
     selectedOption: {

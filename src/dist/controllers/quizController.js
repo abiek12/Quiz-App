@@ -16,6 +16,7 @@ exports.submitAnswer = exports.getQuestions = exports.getAllQuizCategories = exp
 const quizModel_1 = __importDefault(require("../models/quizModel"));
 const questionModel_1 = __importDefault(require("../models/questionModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
+// Upload Questions handler
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -84,6 +85,7 @@ function uploadQuestions(req, reply) {
     });
 }
 exports.uploadQuestions = uploadQuestions;
+// Get All Category Handlers
 function getAllQuizCategories(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -101,16 +103,17 @@ function getAllQuizCategories(req, reply) {
     });
 }
 exports.getAllQuizCategories = getAllQuizCategories;
+// Get all Questions Handler
 function getQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
-            // Retrieving questions based on the category id
-            const questions = yield quizModel_1.default.findById({
+            // Retrieving questions based on the category id by populating
+            const categoryDetails = yield quizModel_1.default.findById({
                 _id: categoryId,
-            }, { questions: 1 });
-            reply.code(200).send({ success: true, questions });
+            }).populate("questions");
+            return reply.code(200).send({ success: true, categoryDetails });
         }
         catch (error) {
             console.error("An error occurred:", error);

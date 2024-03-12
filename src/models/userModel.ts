@@ -22,7 +22,7 @@ interface UserDocument extends Document {
 const QuestionAndSelectedOptSchema = new Schema<QuestionAndSelectedOpt>({
   questionId: {
     type: mongoose.Types.ObjectId,
-    ref: "Quest",
+    ref: Quest,
     required: true,
   },
   selectedOption: {

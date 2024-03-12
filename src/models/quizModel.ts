@@ -14,7 +14,7 @@ const quizSchema: Schema<QuizDocument> = new mongoose.Schema({
   },
   questions: {
     type: [mongoose.Types.ObjectId],
-    ref: "Quest",
+    ref: Quest,
     required: true,
   },
 });
