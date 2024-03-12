@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import Quiz from "../models/quizModel";
 import Quest from "../models/questionModel";
 import mongoose from "mongoose";
+import User from "../models/userModel";
 
 type IncomingData = {
   Category: string;
@@ -26,6 +27,7 @@ type ParamsType = {
 };
 
 type AnswerSubmitType = {
+  UserId: mongoose.Types.ObjectId;
   Question: string;
   SelectedOption: string;
 };
@@ -150,7 +152,11 @@ export async function submitAnswer(
   reply: FastifyReply
 ) {
   try {
-    let { Question, SelectedOption } = req.body as AnswerSubmitType;
+    let { UserId, Question, SelectedOption } = req.body as AnswerSubmitType;
+    console.log(UserId);
+
+    const user = User.findOne({ _id: UserId });
+
     Question = Question.toLowerCase();
     SelectedOption = SelectedOption.toLowerCase();
     // Converting the id from params into object id

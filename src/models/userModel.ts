@@ -16,7 +16,7 @@ interface UserDocument extends Document {
   userName: string;
   email: string;
   password: string;
-  categoryScores: CategoryScore[];
+  attendedCategoryDetail: CategoryScore[];
 }
 
 const QuestionAndSelectedOptSchema = new Schema<QuestionAndSelectedOpt>({
@@ -54,7 +54,7 @@ const userSchema = new Schema<UserDocument>({
     type: String,
     required: true,
   },
-  categoryScores: [categoryScoreSchema],
+  attendedCategoryDetail: [categoryScoreSchema],
 });
 
 const User = mongoose.model<UserDocument>("users", userSchema);

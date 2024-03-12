@@ -39,7 +39,7 @@ const userSchema = new mongoose_2.Schema({
         type: String,
         required: true,
     },
-    categoryScores: [categoryScoreSchema],
+    attendedCategoryDetail: [categoryScoreSchema],
 });
 const User = mongoose_1.default.model("users", userSchema);
 exports.default = User;

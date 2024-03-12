@@ -16,6 +16,7 @@ exports.submitAnswer = exports.getQuestions = exports.getAllQuizCategories = exp
 const quizModel_1 = __importDefault(require("../models/quizModel"));
 const questionModel_1 = __importDefault(require("../models/questionModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const userModel_1 = __importDefault(require("../models/userModel"));
 // Upload Questions handler
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -128,7 +129,9 @@ exports.getQuestions = getQuestions;
 function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let { Question, SelectedOption } = req.body;
+            let { UserId, Question, SelectedOption } = req.body;
+            console.log(UserId);
+            const user = userModel_1.default.findOne({ _id: UserId });
             Question = Question.toLowerCase();
             SelectedOption = SelectedOption.toLowerCase();
             // Converting the id from params into object id
