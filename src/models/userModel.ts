@@ -2,12 +2,12 @@ import mongoose, { ObjectId } from "mongoose";
 import { Document, Schema, Model } from "mongoose";
 import Quest from "./questionModel";
 
-interface QuestionAndSelectedOpt {
+interface QuestionAndSelectedOpt extends Document {
   questionId: ObjectId;
   selectedOption: string;
 }
 
-interface CategoryScore {
+interface CategoryScore extends Document {
   attendedQuestions: QuestionAndSelectedOpt[];
   score: number;
 }
@@ -22,7 +22,7 @@ interface UserDocument extends Document {
 const QuestionAndSelectedOptSchema = new Schema<QuestionAndSelectedOpt>({
   questionId: {
     type: mongoose.Types.ObjectId,
-    ref: "Quiz",
+    ref: "Quest",
     required: true,
   },
   selectedOption: {
