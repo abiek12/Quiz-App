@@ -7,24 +7,13 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const quizSchema = new mongoose_1.default.Schema({
     category: {
         type: String,
-        required: [true, "Please provide category!"],
+        required: true,
     },
-    questions: [
-        {
-            question: {
-                type: String,
-                required: [true, "Please provide question!"],
-            },
-            options: {
-                type: [String],
-                required: [true, "Please provide options!"],
-            },
-            answer: {
-                type: String,
-                required: [true, "Please provide answer!"],
-            },
-        },
-    ],
+    questions: {
+        type: [mongoose_1.default.Types.ObjectId],
+        ref: "Quest",
+        required: true,
+    },
 });
 const Quiz = mongoose_1.default.model("quiz", quizSchema);
 exports.default = Quiz;

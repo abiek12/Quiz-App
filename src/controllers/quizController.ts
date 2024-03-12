@@ -61,8 +61,17 @@ export async function uploadQuestions(
     if (existngCategory == null) {
       await Quiz.create({
         category: Category,
-        questions: [{ question: Question, options: Options, answer: Answer }],
+        questions: [],
       });
+      const questionId = await Quest.create({
+        question: Question,
+        options: Options,
+        answer: Answer,
+      });
+      await Quiz.updateOne(
+        { category: Category },
+        { $push: { questions: questionId._id } }
+      );
       return reply
         .code(200)
         .send({ success: true, message: "Quiz uploaded successfully" });

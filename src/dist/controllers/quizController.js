@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.submitAnswer = exports.getQuestions = exports.getAllQuizCategories = exports.uploadQuestions = void 0;
 const quizModel_1 = __importDefault(require("../models/quizModel"));
+const questionModel_1 = __importDefault(require("../models/questionModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -38,8 +39,14 @@ function uploadQuestions(req, reply) {
             if (existngCategory == null) {
                 yield quizModel_1.default.create({
                     category: Category,
-                    questions: [{ question: Question, options: Options, answer: Answer }],
+                    questions: [],
                 });
+                const questionId = yield questionModel_1.default.create({
+                    question: Question,
+                    options: Options,
+                    answer: Answer,
+                });
+                yield quizModel_1.default.updateOne({ category: Category }, { $push: { questions: questionId._id } });
                 return reply
                     .code(200)
                     .send({ success: true, message: "Quiz uploaded successfully" });
