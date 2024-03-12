@@ -41,20 +41,20 @@ function uploadQuestions(req, reply) {
                     category: Category,
                     questions: [],
                 });
-                const questionId = yield questionModel_1.default.create({
+                const questionDetails = yield questionModel_1.default.create({
                     question: Question,
                     options: Options,
                     answer: Answer,
                 });
-                yield quizModel_1.default.updateOne({ category: Category }, { $push: { questions: questionId._id } });
+                yield quizModel_1.default.updateOne({ category: Category }, { $push: { questions: questionDetails._id } });
                 return reply
                     .code(200)
                     .send({ success: true, message: "Quiz uploaded successfully" });
             }
             else {
                 // checking incoming question is already exist
-                const existingQuestion = yield quizModel_1.default.findOne({
-                    questions: { $elemMatch: { question: Question } },
+                const existingQuestion = yield questionModel_1.default.findOne({
+                    question: Question,
                 });
                 if (existingQuestion) {
                     return reply
@@ -62,13 +62,12 @@ function uploadQuestions(req, reply) {
                         .send({ success: false, message: "Question already Exist!" });
                 }
                 // pushing new questions to corresponding category
-                yield quizModel_1.default.updateOne({ category: existngCategory.category }, {
-                    $push: {
-                        questions: [
-                            { question: Question, options: Options, answer: Answer },
-                        ],
-                    },
+                const questionDetails = yield questionModel_1.default.create({
+                    question: Question,
+                    options: Options,
+                    answer: Answer,
                 });
+                yield quizModel_1.default.updateOne({ category: existngCategory.category }, { $push: { questions: questionDetails._id } });
                 return reply.code(200).send({
                     success: true,
                     message: `Question added to ${existngCategory.category} Category successfully`,

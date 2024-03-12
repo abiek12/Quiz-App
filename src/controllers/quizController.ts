@@ -63,22 +63,22 @@ export async function uploadQuestions(
         category: Category,
         questions: [],
       });
-      const questionId = await Quest.create({
+      const questionDetails = await Quest.create({
         question: Question,
         options: Options,
         answer: Answer,
       });
       await Quiz.updateOne(
         { category: Category },
-        { $push: { questions: questionId._id } }
+        { $push: { questions: questionDetails._id } }
       );
       return reply
         .code(200)
         .send({ success: true, message: "Quiz uploaded successfully" });
     } else {
       // checking incoming question is already exist
-      const existingQuestion: QuizDocument | null = await Quiz.findOne({
-        questions: { $elemMatch: { question: Question } },
+      const existingQuestion: QuizDocument | null = await Quest.findOne({
+        question: Question,
       });
       if (existingQuestion) {
         return reply
@@ -86,15 +86,14 @@ export async function uploadQuestions(
           .send({ success: false, message: "Question already Exist!" });
       }
       // pushing new questions to corresponding category
+      const questionDetails = await Quest.create({
+        question: Question,
+        options: Options,
+        answer: Answer,
+      });
       await Quiz.updateOne(
         { category: existngCategory.category },
-        {
-          $push: {
-            questions: [
-              { question: Question, options: Options, answer: Answer },
-            ],
-          },
-        }
+        { $push: { questions: questionDetails._id } }
       );
       return reply.code(200).send({
         success: true,
