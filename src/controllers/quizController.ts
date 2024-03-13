@@ -3,6 +3,7 @@ import Quiz from "../models/quizModel";
 import Quest from "../models/questionModel";
 import mongoose from "mongoose";
 import User from "../models/userModel";
+import { answerChecking } from "../helpers/quizHelper";
 
 type IncomingData = {
   Category: string;
@@ -167,12 +168,45 @@ export async function submitAnswer(
     const questId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       QuestionId
     );
-
-    // Converting the id from params into object id
     const catId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
     );
 
+    
+    SelectedOption = SelectedOption.toLowerCase();
+    // Retrieve the answerData based on the category ID
+    const answerData: QuizDocument | null = await Quiz.findById(catId).populate(
+      "questions"
+    );
+    const questStringId = questId.toString();
+    if (answerData) {
+      // Find the matched question in the answerData
+      const matchedQuestion = answerData.questions.find(
+        (questions) => questions._id.toString() === questStringId
+      );
+
+      if (matchedQuestion) {
+        // Check if the submitted answer matches the correct answer for the matched question
+        const correctAnswer: string = matchedQuestion.answer;
+        // Comparing the selected option and correct answer
+        const isCorrect: boolean = SelectedOption === correctAnswer;
+        return reply.code(200).send({ isCorrect });
+      } else {
+        // If no matching question is found, send an appropriate error response
+        return reply.code(404).send({
+          success: false,
+          message: "Question not found/Incorrect!",
+        });
+      }
+    } else {
+      // If no matching category is found, send an appropriate error response
+      return reply.code(404).send({
+        success: false,
+        message: "Category not found/Incorrect!",
+      });
+    }
+    
+    answerChecking(SelectedOption,catId)
     // Retriving user from user collection
     const user: UserType | null = await User.findOne({ _id: userId });
 
@@ -210,40 +244,6 @@ export async function submitAnswer(
               new: true, // Return the modified document
             }
           );
-          SelectedOption = SelectedOption.toLowerCase();
-          // Retrieve the answerData based on the category ID
-          const answerData: QuizDocument | null = await Quiz.findById(
-            catId
-          ).populate("questions");
-          const questStringId = questId.toString();
-          if (answerData) {
-            // Find the matched question in the answerData
-            const matchedQuestion = answerData.questions.find(
-              (questions) => questions._id.toString() === questStringId
-            );
-
-            if (matchedQuestion) {
-              // Check if the submitted answer matches the correct answer for the matched question
-              const correctAnswer: string = matchedQuestion.answer;
-              // Comparing the selected option and correct answer
-              const isCorrect: boolean = SelectedOption === correctAnswer;
-              return reply.code(200).send({ isCorrect });
-            } else {
-              // If no matching question is found, send an appropriate error response
-              return reply.code(404).send({
-                success: false,
-                message: "Question not found/Incorrect!",
-              });
-            }
-          } else {
-            // If no matching category is found, send an appropriate error response
-            return reply
-              .code(404)
-              .send({
-                success: false,
-                message: "Category not found/Incorrect!",
-              });
-          }
         }
       } else {
         await User.findByIdAndUpdate(
@@ -265,38 +265,6 @@ export async function submitAnswer(
             },
           }
         );
-
-        SelectedOption = SelectedOption.toLowerCase();
-        // Retrieve the answerData based on the category ID
-        const answerData: QuizDocument | null = await Quiz.findById(
-          catId
-        ).populate("questions");
-        const questStringId = questId.toString();
-        if (answerData) {
-          // Find the matched question in the answerData
-          const matchedQuestion = answerData.questions.find(
-            (questions) => questions._id.toString() === questStringId
-          );
-
-          if (matchedQuestion) {
-            // Check if the submitted answer matches the correct answer for the matched question
-            const correctAnswer: string = matchedQuestion.answer;
-            // Comparing the selected option and correct answer
-            const isCorrect: boolean = SelectedOption === correctAnswer;
-            return reply.code(200).send({ isCorrect });
-          } else {
-            // If no matching question is found, send an appropriate error response
-            return reply.code(404).send({
-              success: false,
-              message: "Question not found/Incorrect!",
-            });
-          }
-        } else {
-          // If no matching category is found, send an appropriate error response
-          return reply
-            .code(404)
-            .send({ success: false, message: "Category not found/Incorrect!" });
-        }
       }
     } else {
       return reply

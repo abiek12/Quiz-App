@@ -17,6 +17,7 @@ const quizModel_1 = __importDefault(require("../models/quizModel"));
 const questionModel_1 = __importDefault(require("../models/questionModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const userModel_1 = __importDefault(require("../models/userModel"));
+const quizHelper_1 = require("../helpers/quizHelper");
 // Upload Questions handler
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -133,8 +134,37 @@ function submitAnswer(req, reply) {
             let { UserId, QuestionId, SelectedOption } = req.body;
             const userId = new mongoose_1.default.Types.ObjectId(UserId);
             const questId = new mongoose_1.default.Types.ObjectId(QuestionId);
-            // Converting the id from params into object id
             const catId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            SelectedOption = SelectedOption.toLowerCase();
+            // Retrieve the answerData based on the category ID
+            const answerData = yield quizModel_1.default.findById(catId).populate("questions");
+            const questStringId = questId.toString();
+            if (answerData) {
+                // Find the matched question in the answerData
+                const matchedQuestion = answerData.questions.find((questions) => questions._id.toString() === questStringId);
+                if (matchedQuestion) {
+                    // Check if the submitted answer matches the correct answer for the matched question
+                    const correctAnswer = matchedQuestion.answer;
+                    // Comparing the selected option and correct answer
+                    const isCorrect = SelectedOption === correctAnswer;
+                    return reply.code(200).send({ isCorrect });
+                }
+                else {
+                    // If no matching question is found, send an appropriate error response
+                    return reply.code(404).send({
+                        success: false,
+                        message: "Question not found/Incorrect!",
+                    });
+                }
+            }
+            else {
+                // If no matching category is found, send an appropriate error response
+                return reply.code(404).send({
+                    success: false,
+                    message: "Category not found/Incorrect!",
+                });
+            }
+            (0, quizHelper_1.answerChecking)(SelectedOption, catId);
             // Retriving user from user collection
             const user = yield userModel_1.default.findOne({ _id: userId });
             if (user != null) {
@@ -167,37 +197,6 @@ function submitAnswer(req, reply) {
                             arrayFilters: [{ "category.categoryId": catId }],
                             new: true, // Return the modified document
                         });
-                        SelectedOption = SelectedOption.toLowerCase();
-                        // Retrieve the answerData based on the category ID
-                        const answerData = yield quizModel_1.default.findById(catId).populate("questions");
-                        const questStringId = questId.toString();
-                        if (answerData) {
-                            // Find the matched question in the answerData
-                            const matchedQuestion = answerData.questions.find((questions) => questions._id.toString() === questStringId);
-                            if (matchedQuestion) {
-                                // Check if the submitted answer matches the correct answer for the matched question
-                                const correctAnswer = matchedQuestion.answer;
-                                // Comparing the selected option and correct answer
-                                const isCorrect = SelectedOption === correctAnswer;
-                                return reply.code(200).send({ isCorrect });
-                            }
-                            else {
-                                // If no matching question is found, send an appropriate error response
-                                return reply.code(404).send({
-                                    success: false,
-                                    message: "Question not found/Incorrect!",
-                                });
-                            }
-                        }
-                        else {
-                            // If no matching category is found, send an appropriate error response
-                            return reply
-                                .code(404)
-                                .send({
-                                success: false,
-                                message: "Category not found/Incorrect!",
-                            });
-                        }
                     }
                 }
                 else {
@@ -217,34 +216,6 @@ function submitAnswer(req, reply) {
                             ],
                         },
                     });
-                    SelectedOption = SelectedOption.toLowerCase();
-                    // Retrieve the answerData based on the category ID
-                    const answerData = yield quizModel_1.default.findById(catId).populate("questions");
-                    const questStringId = questId.toString();
-                    if (answerData) {
-                        // Find the matched question in the answerData
-                        const matchedQuestion = answerData.questions.find((questions) => questions._id.toString() === questStringId);
-                        if (matchedQuestion) {
-                            // Check if the submitted answer matches the correct answer for the matched question
-                            const correctAnswer = matchedQuestion.answer;
-                            // Comparing the selected option and correct answer
-                            const isCorrect = SelectedOption === correctAnswer;
-                            return reply.code(200).send({ isCorrect });
-                        }
-                        else {
-                            // If no matching question is found, send an appropriate error response
-                            return reply.code(404).send({
-                                success: false,
-                                message: "Question not found/Incorrect!",
-                            });
-                        }
-                    }
-                    else {
-                        // If no matching category is found, send an appropriate error response
-                        return reply
-                            .code(404)
-                            .send({ success: false, message: "Category not found/Incorrect!" });
-                    }
                 }
             }
             else {
