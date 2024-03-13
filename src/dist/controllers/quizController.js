@@ -51,7 +51,7 @@ function uploadQuestions(req, reply) {
                 yield quizModel_1.default.updateOne({ category: Category }, { $push: { questions: questionDetails._id } });
                 return reply
                     .code(200)
-                    .send({ success: true, message: "Quiz uploaded successfully" });
+                    .send({ success: true, message: `new ${Category} quiz created` });
             }
             else {
                 // checking incoming question is already exist
@@ -164,6 +164,7 @@ function submitAnswer(req, reply) {
                     message: "Category not found/Incorrect!",
                 });
             }
+            // Update User
             const response = yield updateUser(userId, catId, questId, SelectedOption, isCorrect);
             return reply.send(response);
         }
@@ -177,6 +178,7 @@ function submitAnswer(req, reply) {
     });
 }
 exports.submitAnswer = submitAnswer;
+// User update helper function
 function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
     return __awaiter(this, void 0, void 0, function* () {
         let Score = 0;
@@ -199,7 +201,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         return "You have already attended this question!";
                     }
                     else {
-                        // Retriving existing score from the db
+                        // Retriving existing score of the perticular category from the user document
                         const userCatScore = yield userModel_1.default.aggregate([
                             { $match: { _id: userId } }, // Match the user by ID
                             { $unwind: "$attendedCategoryDetail" }, // Unwind the attendedCategoryDetail array

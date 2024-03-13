@@ -79,7 +79,7 @@ export async function uploadQuestions(
       );
       return reply
         .code(200)
-        .send({ success: true, message: "Quiz uploaded successfully" });
+        .send({ success: true, message: `new ${Category} quiz created` });
     } else {
       // checking incoming question is already exist
       const existingQuestion: QuizDocument | null = await Quest.findOne({
@@ -203,6 +203,7 @@ export async function submitAnswer(
         message: "Category not found/Incorrect!",
       });
     }
+    // Update User
     const response = await updateUser(
       userId,
       catId,
@@ -220,6 +221,7 @@ export async function submitAnswer(
   }
 }
 
+// User update helper function
 async function updateUser(
   userId: mongoose.Types.ObjectId,
   catId: mongoose.Types.ObjectId,
@@ -246,7 +248,7 @@ async function updateUser(
         if (matchedQuestion) {
           return "You have already attended this question!";
         } else {
-          // Retriving existing score from the db
+          // Retriving existing score of the perticular category from the user document
           const userCatScore = await User.aggregate([
             { $match: { _id: userId } }, // Match the user by ID
             { $unwind: "$attendedCategoryDetail" }, // Unwind the attendedCategoryDetail array
