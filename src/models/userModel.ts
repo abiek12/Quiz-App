@@ -1,6 +1,7 @@
 import mongoose, { ObjectId } from "mongoose";
 import { Document, Schema, Model } from "mongoose";
 import Quest from "./questionModel";
+import Quiz from "./quizModel";
 
 interface QuestionAndSelectedOpt extends Document {
   questionId: ObjectId;
@@ -8,6 +9,7 @@ interface QuestionAndSelectedOpt extends Document {
 }
 
 interface CategoryScore extends Document {
+  categoryId: mongoose.Types.ObjectId[];
   attendedQuestions: QuestionAndSelectedOpt[];
   score: number;
 }
@@ -32,6 +34,11 @@ const QuestionAndSelectedOptSchema = new Schema<QuestionAndSelectedOpt>({
 });
 
 const categoryScoreSchema = new Schema<CategoryScore>({
+  categoryId: {
+    type: [mongoose.Types.ObjectId],
+    ref: Quiz,
+    required: true,
+  },
   attendedQuestions: [QuestionAndSelectedOptSchema],
   score: {
     type: Number,

@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const mongoose_2 = require("mongoose");
 const questionModel_1 = __importDefault(require("./questionModel"));
+const quizModel_1 = __importDefault(require("./quizModel"));
 const QuestionAndSelectedOptSchema = new mongoose_2.Schema({
     questionId: {
         type: mongoose_1.default.Types.ObjectId,
@@ -18,6 +19,11 @@ const QuestionAndSelectedOptSchema = new mongoose_2.Schema({
     },
 });
 const categoryScoreSchema = new mongoose_2.Schema({
+    categoryId: {
+        type: [mongoose_1.default.Types.ObjectId],
+        ref: quizModel_1.default,
+        required: true,
+    },
     attendedQuestions: [QuestionAndSelectedOptSchema],
     score: {
         type: Number,

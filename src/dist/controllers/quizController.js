@@ -138,15 +138,27 @@ function submitAnswer(req, reply) {
             const user = yield userModel_1.default.findOne({ _id: userId });
             if (user != null) {
                 // Checking if the user already attended the question
-                if (user.attendedCategoryDetail.length !== 0) {
-                    const matchedQuestion = yield userModel_1.default.findOne({
-                        "attendedCategoryDetail.attendedQuestions.questionId": {
-                            $elemMatch: { questionId: questId },
-                        },
+                // if (user.attendedCategoryDetail.length !== 0) {
+                const matchedQuestion = yield userModel_1.default.findOne({ _id: userId }, {
+                    "attendedCategoryDetail.attendedQuestions.questionId": {
+                        $elemMatch: { questionId: questId },
+                    },
+                });
+                if (matchedQuestion) {
+                    return reply.code(400).send({
+                        success: false,
+                        message: "You have already attended this question!",
                     });
                 }
                 else {
+                    yield userModel_1.default.findByIdAndUpdate({ _id: userId }, {
+                        $push: {
+                            'attendedCategoryDetail.': 
+                        }
+                    });
                 }
+                // } else {
+                // }
             }
             SelectedOption = SelectedOption.toLowerCase();
             // Retrieve the answerData based on the category ID
