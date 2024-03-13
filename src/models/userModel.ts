@@ -9,7 +9,7 @@ interface QuestionAndSelectedOpt extends Document {
 }
 
 interface CategoryScore extends Document {
-  categoryId: mongoose.Types.ObjectId[];
+  categoryId: ObjectId;
   attendedQuestions: QuestionAndSelectedOpt[];
   score: number;
 }
@@ -35,7 +35,7 @@ const QuestionAndSelectedOptSchema = new Schema<QuestionAndSelectedOpt>({
 
 const categoryScoreSchema = new Schema<CategoryScore>({
   categoryId: {
-    type: [mongoose.Types.ObjectId],
+    type: mongoose.Types.ObjectId,
     ref: Quiz,
     required: true,
   },
