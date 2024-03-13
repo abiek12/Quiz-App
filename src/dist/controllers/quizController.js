@@ -126,6 +126,7 @@ function getQuestions(req, reply) {
     });
 }
 exports.getQuestions = getQuestions;
+// Submit Answer handler
 function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -133,59 +134,123 @@ function submitAnswer(req, reply) {
             const userId = new mongoose_1.default.Types.ObjectId(UserId);
             const questId = new mongoose_1.default.Types.ObjectId(QuestionId);
             // Converting the id from params into object id
-            const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            const catId = new mongoose_1.default.Types.ObjectId(req.params.id);
             // Retriving user from user collection
             const user = yield userModel_1.default.findOne({ _id: userId });
             if (user != null) {
                 // Checking if the user already attended the question
-                // if (user.attendedCategoryDetail.length !== 0) {
-                const matchedQuestion = yield userModel_1.default.findOne({ _id: userId }, {
-                    "attendedCategoryDetail.attendedQuestions.questionId": {
-                        $elemMatch: { questionId: questId },
-                    },
-                });
-                if (matchedQuestion) {
-                    return reply.code(400).send({
-                        success: false,
-                        message: "You have already attended this question!",
+                if (user.attendedCategoryDetail.length !== 0) {
+                    const matchedQuestion = yield userModel_1.default.findOne({
+                        _id: userId,
+                        "attendedCategoryDetail.attendedQuestions.questionId": questId,
                     });
+                    if (matchedQuestion) {
+                        return reply.code(400).send({
+                            success: false,
+                            message: "You have already attended this question!",
+                        });
+                    }
+                    else {
+                        yield userModel_1.default.findByIdAndUpdate({
+                            _id: userId,
+                            "attendedCategoryDetail.categoryId": catId,
+                        }, {
+                            $push: {
+                                "attendedCategoryDetail.$[category].attendedQuestions": [
+                                    {
+                                        questionId: questId,
+                                        selectedOption: SelectedOption,
+                                    },
+                                ],
+                            },
+                        }, {
+                            arrayFilters: [{ "category.categoryId": catId }],
+                            new: true, // Return the modified document
+                        });
+                        SelectedOption = SelectedOption.toLowerCase();
+                        // Retrieve the answerData based on the category ID
+                        const answerData = yield quizModel_1.default.findById(catId).populate("questions");
+                        const questStringId = questId.toString();
+                        if (answerData) {
+                            // Find the matched question in the answerData
+                            const matchedQuestion = answerData.questions.find((questions) => questions._id.toString() === questStringId);
+                            if (matchedQuestion) {
+                                // Check if the submitted answer matches the correct answer for the matched question
+                                const correctAnswer = matchedQuestion.answer;
+                                // Comparing the selected option and correct answer
+                                const isCorrect = SelectedOption === correctAnswer;
+                                return reply.code(200).send({ isCorrect });
+                            }
+                            else {
+                                // If no matching question is found, send an appropriate error response
+                                return reply.code(404).send({
+                                    success: false,
+                                    message: "Question not found/Incorrect!",
+                                });
+                            }
+                        }
+                        else {
+                            // If no matching category is found, send an appropriate error response
+                            return reply
+                                .code(404)
+                                .send({
+                                success: false,
+                                message: "Category not found/Incorrect!",
+                            });
+                        }
+                    }
                 }
                 else {
                     yield userModel_1.default.findByIdAndUpdate({ _id: userId }, {
                         $push: {
-                            'attendedCategoryDetail.': 
-                        }
+                            attendedCategoryDetail: [
+                                {
+                                    categoryId: catId,
+                                    attendedQuestions: [
+                                        {
+                                            questionId: questId,
+                                            selectedOption: SelectedOption,
+                                        },
+                                    ],
+                                    score: 0, // Set any default value for score here
+                                },
+                            ],
+                        },
                     });
-                }
-                // } else {
-                // }
-            }
-            SelectedOption = SelectedOption.toLowerCase();
-            // Retrieve the answerData based on the category ID
-            const answerData = yield quizModel_1.default.findById(categoryId).populate("questions");
-            const questStringId = questId.toString();
-            if (answerData) {
-                // Find the matched question in the answerData
-                const matchedQuestion = answerData.questions.find((questions) => questions._id.toString() === questStringId);
-                if (matchedQuestion) {
-                    // Check if the submitted answer matches the correct answer for the matched question
-                    const correctAnswer = matchedQuestion.answer;
-                    // Comparing the selected option and correct answer
-                    const isCorrect = SelectedOption === correctAnswer;
-                    return reply.code(200).send({ isCorrect });
-                }
-                else {
-                    // If no matching question is found, send an appropriate error response
-                    return reply
-                        .code(404)
-                        .send({ success: false, message: "Question not found/Incorrect!" });
+                    SelectedOption = SelectedOption.toLowerCase();
+                    // Retrieve the answerData based on the category ID
+                    const answerData = yield quizModel_1.default.findById(catId).populate("questions");
+                    const questStringId = questId.toString();
+                    if (answerData) {
+                        // Find the matched question in the answerData
+                        const matchedQuestion = answerData.questions.find((questions) => questions._id.toString() === questStringId);
+                        if (matchedQuestion) {
+                            // Check if the submitted answer matches the correct answer for the matched question
+                            const correctAnswer = matchedQuestion.answer;
+                            // Comparing the selected option and correct answer
+                            const isCorrect = SelectedOption === correctAnswer;
+                            return reply.code(200).send({ isCorrect });
+                        }
+                        else {
+                            // If no matching question is found, send an appropriate error response
+                            return reply.code(404).send({
+                                success: false,
+                                message: "Question not found/Incorrect!",
+                            });
+                        }
+                    }
+                    else {
+                        // If no matching category is found, send an appropriate error response
+                        return reply
+                            .code(404)
+                            .send({ success: false, message: "Category not found/Incorrect!" });
+                    }
                 }
             }
             else {
-                // If no matching category is found, send an appropriate error response
                 return reply
-                    .code(404)
-                    .send({ success: false, message: "Category not found/Incorrect!" });
+                    .code(401)
+                    .send({ success: false, message: "Unauthenticated!" });
             }
         }
         catch (error) {
