@@ -17,7 +17,6 @@ const quizModel_1 = __importDefault(require("../models/quizModel"));
 const questionModel_1 = __importDefault(require("../models/questionModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const userModel_1 = __importDefault(require("../models/userModel"));
-const quizHelper_1 = require("../helpers/quizHelper");
 // Upload Questions handler
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -135,6 +134,8 @@ function submitAnswer(req, reply) {
             const userId = new mongoose_1.default.Types.ObjectId(UserId);
             const questId = new mongoose_1.default.Types.ObjectId(QuestionId);
             const catId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            // Initialzing isCorrect as false
+            let isCorrect = false;
             SelectedOption = SelectedOption.toLowerCase();
             // Retrieve the answerData based on the category ID
             const answerData = yield quizModel_1.default.findById(catId).populate("questions");
@@ -146,8 +147,7 @@ function submitAnswer(req, reply) {
                     // Check if the submitted answer matches the correct answer for the matched question
                     const correctAnswer = matchedQuestion.answer;
                     // Comparing the selected option and correct answer
-                    const isCorrect = SelectedOption === correctAnswer;
-                    return reply.code(200).send({ isCorrect });
+                    isCorrect = SelectedOption === correctAnswer;
                 }
                 else {
                     // If no matching question is found, send an appropriate error response
@@ -164,65 +164,8 @@ function submitAnswer(req, reply) {
                     message: "Category not found/Incorrect!",
                 });
             }
-            (0, quizHelper_1.answerChecking)(SelectedOption, catId);
-            // Retriving user from user collection
-            const user = yield userModel_1.default.findOne({ _id: userId });
-            if (user != null) {
-                // Checking if the user already attended the question
-                if (user.attendedCategoryDetail.length !== 0) {
-                    const matchedQuestion = yield userModel_1.default.findOne({
-                        _id: userId,
-                        "attendedCategoryDetail.attendedQuestions.questionId": questId,
-                    });
-                    if (matchedQuestion) {
-                        return reply.code(400).send({
-                            success: false,
-                            message: "You have already attended this question!",
-                        });
-                    }
-                    else {
-                        yield userModel_1.default.findByIdAndUpdate({
-                            _id: userId,
-                            "attendedCategoryDetail.categoryId": catId,
-                        }, {
-                            $push: {
-                                "attendedCategoryDetail.$[category].attendedQuestions": [
-                                    {
-                                        questionId: questId,
-                                        selectedOption: SelectedOption,
-                                    },
-                                ],
-                            },
-                        }, {
-                            arrayFilters: [{ "category.categoryId": catId }],
-                            new: true, // Return the modified document
-                        });
-                    }
-                }
-                else {
-                    yield userModel_1.default.findByIdAndUpdate({ _id: userId }, {
-                        $push: {
-                            attendedCategoryDetail: [
-                                {
-                                    categoryId: catId,
-                                    attendedQuestions: [
-                                        {
-                                            questionId: questId,
-                                            selectedOption: SelectedOption,
-                                        },
-                                    ],
-                                    score: 0, // Set any default value for score here
-                                },
-                            ],
-                        },
-                    });
-                }
-            }
-            else {
-                return reply
-                    .code(401)
-                    .send({ success: false, message: "Unauthenticated!" });
-            }
+            const response = yield updateUser(userId, catId, questId, SelectedOption, isCorrect);
+            return reply.send(response);
         }
         catch (error) {
             console.error("An error occurred:", error);
@@ -234,3 +177,77 @@ function submitAnswer(req, reply) {
     });
 }
 exports.submitAnswer = submitAnswer;
+function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let Score = 0;
+        // Retriving user from user collection
+        const user = yield userModel_1.default.findOne({ _id: userId });
+        if (user != null) {
+            // Checking if the user already attended the question
+            if (user.attendedCategoryDetail.length !== 0) {
+                const matchedQuestion = yield userModel_1.default.findOne({
+                    _id: userId,
+                    "attendedCategoryDetail.attendedQuestions.questionId": questId,
+                });
+                if (matchedQuestion) {
+                    return "You have already attended this question!";
+                }
+                else {
+                    // Retriving existing score from the db
+                    const userCatScore = yield userModel_1.default.findOne({ _id: userId, "attendedCategoryDetail.categoryId": catId }, { "attendedCategoryDetail.score": 1 });
+                    // updating the score
+                    if (userCatScore !== null) {
+                        Score = userCatScore.attendedCategoryDetail[0].score;
+                        isCorrect ? Score++ : Score;
+                    }
+                    // Updating the user document with new data
+                    yield userModel_1.default.findByIdAndUpdate({
+                        _id: userId,
+                        "attendedCategoryDetail.categoryId": catId,
+                    }, {
+                        $push: {
+                            "attendedCategoryDetail.$[category].attendedQuestions": [
+                                {
+                                    questionId: questId,
+                                    selectedOption: SelectedOption,
+                                },
+                            ],
+                        },
+                        $set: {
+                            "attendedCategoryDetail.$[category].score": Score,
+                        },
+                    }, {
+                        arrayFilters: [{ "category.categoryId": catId }],
+                        new: true, // Return the modified document
+                    });
+                    return isCorrect;
+                }
+            }
+            else {
+                //Updating Score for the first time
+                isCorrect ? Score++ : Score;
+                console.log(Score);
+                yield userModel_1.default.findByIdAndUpdate({ _id: userId }, {
+                    $push: {
+                        attendedCategoryDetail: [
+                            {
+                                categoryId: catId,
+                                attendedQuestions: [
+                                    {
+                                        questionId: questId,
+                                        selectedOption: SelectedOption,
+                                    },
+                                ],
+                                score: Score,
+                            },
+                        ],
+                    },
+                });
+                return isCorrect;
+            }
+        }
+        else {
+            return "Unautherised!";
+        }
+    });
+}

@@ -3,7 +3,6 @@ import Quiz from "../models/quizModel";
 import Quest from "../models/questionModel";
 import mongoose from "mongoose";
 import User from "../models/userModel";
-import { answerChecking } from "../helpers/quizHelper";
 
 type IncomingData = {
   Category: string;
@@ -171,8 +170,8 @@ export async function submitAnswer(
     const catId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
     );
-
-    
+    // Initialzing isCorrect as false
+    let isCorrect: boolean = false;
     SelectedOption = SelectedOption.toLowerCase();
     // Retrieve the answerData based on the category ID
     const answerData: QuizDocument | null = await Quiz.findById(catId).populate(
@@ -189,8 +188,7 @@ export async function submitAnswer(
         // Check if the submitted answer matches the correct answer for the matched question
         const correctAnswer: string = matchedQuestion.answer;
         // Comparing the selected option and correct answer
-        const isCorrect: boolean = SelectedOption === correctAnswer;
-        return reply.code(200).send({ isCorrect });
+        isCorrect = SelectedOption === correctAnswer;
       } else {
         // If no matching question is found, send an appropriate error response
         return reply.code(404).send({
@@ -205,77 +203,106 @@ export async function submitAnswer(
         message: "Category not found/Incorrect!",
       });
     }
-    
-    answerChecking(SelectedOption,catId)
-    // Retriving user from user collection
-    const user: UserType | null = await User.findOne({ _id: userId });
-
-    if (user != null) {
-      // Checking if the user already attended the question
-      if (user.attendedCategoryDetail.length !== 0) {
-        const matchedQuestion = await User.findOne({
-          _id: userId,
-          "attendedCategoryDetail.attendedQuestions.questionId": questId,
-        });
-
-        if (matchedQuestion) {
-          return reply.code(400).send({
-            success: false,
-            message: "You have already attended this question!",
-          });
-        } else {
-          await User.findByIdAndUpdate(
-            {
-              _id: userId,
-              "attendedCategoryDetail.categoryId": catId,
-            },
-            {
-              $push: {
-                "attendedCategoryDetail.$[category].attendedQuestions": [
-                  {
-                    questionId: questId,
-                    selectedOption: SelectedOption,
-                  },
-                ],
-              },
-            },
-            {
-              arrayFilters: [{ "category.categoryId": catId }],
-              new: true, // Return the modified document
-            }
-          );
-        }
-      } else {
-        await User.findByIdAndUpdate(
-          { _id: userId },
-          {
-            $push: {
-              attendedCategoryDetail: [
-                {
-                  categoryId: catId,
-                  attendedQuestions: [
-                    {
-                      questionId: questId,
-                      selectedOption: SelectedOption,
-                    },
-                  ],
-                  score: 0, // Set any default value for score here
-                },
-              ],
-            },
-          }
-        );
-      }
-    } else {
-      return reply
-        .code(401)
-        .send({ success: false, message: "Unauthenticated!" });
-    }
+    const response = await updateUser(
+      userId,
+      catId,
+      questId,
+      SelectedOption,
+      isCorrect
+    );
+    return reply.send(response);
   } catch (error) {
     console.error("An error occurred:", error);
     reply.code(500).send({
       success: false,
       message: `An error occurred while submitting answer!, ${error}`,
     });
+  }
+}
+
+async function updateUser(
+  userId: mongoose.Types.ObjectId,
+  catId: mongoose.Types.ObjectId,
+  questId: mongoose.Types.ObjectId,
+  SelectedOption: string,
+  isCorrect: boolean
+) {
+  let Score = 0;
+  // Retriving user from user collection
+  const user: UserType | null = await User.findOne({ _id: userId });
+  if (user != null) {
+    // Checking if the user already attended the question
+    if (user.attendedCategoryDetail.length !== 0) {
+      const matchedQuestion = await User.findOne({
+        _id: userId,
+        "attendedCategoryDetail.attendedQuestions.questionId": questId,
+      });
+
+      if (matchedQuestion) {
+        return "You have already attended this question!";
+      } else {
+        // Retriving existing score from the db
+        const userCatScore = await User.findOne(
+          { _id: userId, "attendedCategoryDetail.categoryId": catId },
+          { "attendedCategoryDetail.score": 1 }
+        );
+        // updating the score
+        if (userCatScore !== null) {
+          Score = userCatScore.attendedCategoryDetail[0].score;
+          isCorrect ? Score++ : Score;
+        }
+        // Updating the user document with new data
+        await User.findByIdAndUpdate(
+          {
+            _id: userId,
+            "attendedCategoryDetail.categoryId": catId,
+          },
+          {
+            $push: {
+              "attendedCategoryDetail.$[category].attendedQuestions": [
+                {
+                  questionId: questId,
+                  selectedOption: SelectedOption,
+                },
+              ],
+            },
+            $set: {
+              "attendedCategoryDetail.$[category].score": Score,
+            },
+          },
+          {
+            arrayFilters: [{ "category.categoryId": catId }],
+            new: true, // Return the modified document
+          }
+        );
+        return isCorrect;
+      }
+    } else {
+      //Updating Score for the first time
+      isCorrect ? Score++ : Score;
+      console.log(Score);
+      await User.findByIdAndUpdate(
+        { _id: userId },
+        {
+          $push: {
+            attendedCategoryDetail: [
+              {
+                categoryId: catId,
+                attendedQuestions: [
+                  {
+                    questionId: questId,
+                    selectedOption: SelectedOption,
+                  },
+                ],
+                score: Score,
+              },
+            ],
+          },
+        }
+      );
+      return isCorrect;
+    }
+  } else {
+    return "Unautherised!";
   }
 }
