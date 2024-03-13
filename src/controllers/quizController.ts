@@ -153,16 +153,17 @@ export async function submitAnswer(
 ) {
   try {
     let { UserId, Question, SelectedOption } = req.body as AnswerSubmitType;
-    console.log(UserId);
-
-    const user = User.findOne({ _id: UserId });
-
-    Question = Question.toLowerCase();
-    SelectedOption = SelectedOption.toLowerCase();
+    const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(UserId);
     // Converting the id from params into object id
     const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
     );
+    
+    // Retriving user from user collection
+    const user = await User.findOne({ _id: userId });
+
+    Question = Question.toLowerCase();
+    SelectedOption = SelectedOption.toLowerCase();
     // Retrieve the answerData based on the category ID
     const answerData: QuizDocument | null = await Quiz.findById(
       categoryId

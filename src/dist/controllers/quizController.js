@@ -130,12 +130,13 @@ function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let { UserId, Question, SelectedOption } = req.body;
-            console.log(UserId);
-            const user = userModel_1.default.findOne({ _id: UserId });
-            Question = Question.toLowerCase();
-            SelectedOption = SelectedOption.toLowerCase();
+            const userId = new mongoose_1.default.Types.ObjectId(UserId);
             // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            // Retriving user from user collection
+            const user = yield userModel_1.default.findOne({ _id: userId });
+            Question = Question.toLowerCase();
+            SelectedOption = SelectedOption.toLowerCase();
             // Retrieve the answerData based on the category ID
             const answerData = yield quizModel_1.default.findById(categoryId).populate("questions");
             if (answerData) {
