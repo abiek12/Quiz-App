@@ -15,6 +15,7 @@ type QuizDocument = {
   category: string;
   questions: [
     {
+      _id: mongoose.Types.ObjectId;
       question: string;
       options: string[];
       answer: string;
@@ -28,8 +29,15 @@ type ParamsType = {
 
 type AnswerSubmitType = {
   UserId: mongoose.Types.ObjectId;
-  Question: string;
+  QuestionId: mongoose.Types.ObjectId;
   SelectedOption: string;
+};
+
+type UserType = {
+  userName: string;
+  email: string;
+  password: string;
+  attendedCategoryDetail: string[];
 };
 
 // Upload Questions handler
@@ -152,27 +160,45 @@ export async function submitAnswer(
   reply: FastifyReply
 ) {
   try {
-    let { UserId, Question, SelectedOption } = req.body as AnswerSubmitType;
+    let { UserId, QuestionId, SelectedOption } = req.body as AnswerSubmitType;
     const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(UserId);
+    const questId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
+      QuestionId
+    );
+
     // Converting the id from params into object id
     const categoryId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.params.id
     );
-    
-    // Retriving user from user collection
-    const user = await User.findOne({ _id: userId });
 
-    Question = Question.toLowerCase();
+    // Retriving user from user collection
+    const user: UserType | null = await User.findOne({ _id: userId });
+
+    if (user != null) {
+      // Checking if the user already attended the question
+      if (user.attendedCategoryDetail.length !== 0) {
+        const matchedQuestion = await User.findOne({
+          "attendedCategoryDetail.attendedQuestions.questionId": {
+            $elemMatch: { questionId: questId },
+          },
+        });
+      } else {
+      }
+    }
+
     SelectedOption = SelectedOption.toLowerCase();
     // Retrieve the answerData based on the category ID
     const answerData: QuizDocument | null = await Quiz.findById(
       categoryId
     ).populate("questions");
+
+    const questStringId = questId.toString();
     if (answerData) {
       // Find the matched question in the answerData
       const matchedQuestion = answerData.questions.find(
-        (questions) => questions.question === Question
+        (questions) => questions._id.toString() === questStringId
       );
+
       if (matchedQuestion) {
         // Check if the submitted answer matches the correct answer for the matched question
         const correctAnswer: string = matchedQuestion.answer;

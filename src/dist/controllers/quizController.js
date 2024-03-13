@@ -129,19 +129,32 @@ exports.getQuestions = getQuestions;
 function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let { UserId, Question, SelectedOption } = req.body;
+            let { UserId, QuestionId, SelectedOption } = req.body;
             const userId = new mongoose_1.default.Types.ObjectId(UserId);
+            const questId = new mongoose_1.default.Types.ObjectId(QuestionId);
             // Converting the id from params into object id
             const categoryId = new mongoose_1.default.Types.ObjectId(req.params.id);
             // Retriving user from user collection
             const user = yield userModel_1.default.findOne({ _id: userId });
-            Question = Question.toLowerCase();
+            if (user != null) {
+                // Checking if the user already attended the question
+                if (user.attendedCategoryDetail.length !== 0) {
+                    const matchedQuestion = yield userModel_1.default.findOne({
+                        "attendedCategoryDetail.attendedQuestions.questionId": {
+                            $elemMatch: { questionId: questId },
+                        },
+                    });
+                }
+                else {
+                }
+            }
             SelectedOption = SelectedOption.toLowerCase();
             // Retrieve the answerData based on the category ID
             const answerData = yield quizModel_1.default.findById(categoryId).populate("questions");
+            const questStringId = questId.toString();
             if (answerData) {
                 // Find the matched question in the answerData
-                const matchedQuestion = answerData.questions.find((questions) => questions.question === Question);
+                const matchedQuestion = answerData.questions.find((questions) => questions._id.toString() === questStringId);
                 if (matchedQuestion) {
                     // Check if the submitted answer matches the correct answer for the matched question
                     const correctAnswer = matchedQuestion.answer;
