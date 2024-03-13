@@ -187,7 +187,7 @@ export async function submitAnswer(
       if (matchedQuestion) {
         // Check if the submitted answer matches the correct answer for the matched question
         const correctAnswer: string = matchedQuestion.answer;
-        // Comparing the selected option and correct answer
+        // Comparing the selected option and correct answer and stores
         isCorrect = SelectedOption === correctAnswer;
       } else {
         // If no matching question is found, send an appropriate error response
@@ -233,46 +233,80 @@ async function updateUser(
   if (user != null) {
     // Checking if the user already attended the question
     if (user.attendedCategoryDetail.length !== 0) {
-      const matchedQuestion = await User.findOne({
-        _id: userId,
-        "attendedCategoryDetail.attendedQuestions.questionId": questId,
+      // Checking wheather the category is exist
+      const matchedCategory = await User.findOne({
+        "attendedCategoryDetail.categoryId": catId,
       });
+      if (matchedCategory) {
+        // Checking wheather the question is exist
+        const matchedQuestion = await User.findOne({
+          _id: userId,
+          "attendedCategoryDetail.attendedQuestions.questionId": questId,
+        });
+        if (matchedQuestion) {
+          return "You have already attended this question!";
+        } else {
+          // Retriving existing score from the db
+          const userCatScore = await User.aggregate([
+            { $match: { _id: userId } }, // Match the user by ID
+            { $unwind: "$attendedCategoryDetail" }, // Unwind the attendedCategoryDetail array
+            { $match: { "attendedCategoryDetail.categoryId": catId } }, // Match the category by ID
+            { $project: { _id: 0, score: "$attendedCategoryDetail.score" } }, // Project only the score
+          ]);
 
-      if (matchedQuestion) {
-        return "You have already attended this question!";
-      } else {
-        // Retriving existing score from the db
-        const userCatScore = await User.findOne(
-          { _id: userId, "attendedCategoryDetail.categoryId": catId },
-          { "attendedCategoryDetail.score": 1 }
-        );
-        // updating the score
-        if (userCatScore !== null) {
-          Score = userCatScore.attendedCategoryDetail[0].score;
-          isCorrect ? Score++ : Score;
+          // updating the score
+          if (userCatScore !== null) {
+            Score = userCatScore[0].score;
+            isCorrect ? Score++ : Score;
+          }
+          // Updating the user document with new data
+          await User.findByIdAndUpdate(
+            {
+              _id: userId,
+              "attendedCategoryDetail.categoryId": catId,
+            },
+            {
+              $push: {
+                "attendedCategoryDetail.$[category].attendedQuestions": [
+                  {
+                    questionId: questId,
+                    selectedOption: SelectedOption,
+                  },
+                ],
+              },
+              $set: {
+                "attendedCategoryDetail.$[category].score": Score,
+              },
+            },
+            {
+              arrayFilters: [{ "category.categoryId": catId }],
+              new: true, // Return the modified document
+            }
+          );
+          return isCorrect;
         }
-        // Updating the user document with new data
+      } else {
+        //Updating Score for the first time
+        isCorrect ? Score++ : Score;
         await User.findByIdAndUpdate(
           {
             _id: userId,
-            "attendedCategoryDetail.categoryId": catId,
           },
           {
             $push: {
-              "attendedCategoryDetail.$[category].attendedQuestions": [
+              attendedCategoryDetail: [
                 {
-                  questionId: questId,
-                  selectedOption: SelectedOption,
+                  categoryId: catId,
+                  attendedQuestions: [
+                    {
+                      questionId: questId,
+                      selectedOption: SelectedOption,
+                    },
+                  ],
+                  score: Score,
                 },
               ],
             },
-            $set: {
-              "attendedCategoryDetail.$[category].score": Score,
-            },
-          },
-          {
-            arrayFilters: [{ "category.categoryId": catId }],
-            new: true, // Return the modified document
           }
         );
         return isCorrect;
@@ -280,7 +314,6 @@ async function updateUser(
     } else {
       //Updating Score for the first time
       isCorrect ? Score++ : Score;
-      console.log(Score);
       await User.findByIdAndUpdate(
         { _id: userId },
         {

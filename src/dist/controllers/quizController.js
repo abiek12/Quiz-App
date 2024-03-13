@@ -146,7 +146,7 @@ function submitAnswer(req, reply) {
                 if (matchedQuestion) {
                     // Check if the submitted answer matches the correct answer for the matched question
                     const correctAnswer = matchedQuestion.answer;
-                    // Comparing the selected option and correct answer
+                    // Comparing the selected option and correct answer and stores
                     isCorrect = SelectedOption === correctAnswer;
                 }
                 else {
@@ -185,40 +185,75 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
         if (user != null) {
             // Checking if the user already attended the question
             if (user.attendedCategoryDetail.length !== 0) {
-                const matchedQuestion = yield userModel_1.default.findOne({
-                    _id: userId,
-                    "attendedCategoryDetail.attendedQuestions.questionId": questId,
+                // Checking wheather the category is exist
+                const matchedCategory = yield userModel_1.default.findOne({
+                    "attendedCategoryDetail.categoryId": catId,
                 });
-                if (matchedQuestion) {
-                    return "You have already attended this question!";
+                if (matchedCategory) {
+                    // Checking wheather the question is exist
+                    const matchedQuestion = yield userModel_1.default.findOne({
+                        _id: userId,
+                        "attendedCategoryDetail.attendedQuestions.questionId": questId,
+                    });
+                    if (matchedQuestion) {
+                        return "You have already attended this question!";
+                    }
+                    else {
+                        // Retriving existing score from the db
+                        const userCatScore = yield userModel_1.default.aggregate([
+                            { $match: { _id: userId } }, // Match the user by ID
+                            { $unwind: "$attendedCategoryDetail" }, // Unwind the attendedCategoryDetail array
+                            { $match: { "attendedCategoryDetail.categoryId": catId } }, // Match the category by ID
+                            { $project: { _id: 0, score: "$attendedCategoryDetail.score" } }, // Project only the score
+                        ]);
+                        // updating the score
+                        if (userCatScore !== null) {
+                            Score = userCatScore[0].score;
+                            isCorrect ? Score++ : Score;
+                        }
+                        // Updating the user document with new data
+                        yield userModel_1.default.findByIdAndUpdate({
+                            _id: userId,
+                            "attendedCategoryDetail.categoryId": catId,
+                        }, {
+                            $push: {
+                                "attendedCategoryDetail.$[category].attendedQuestions": [
+                                    {
+                                        questionId: questId,
+                                        selectedOption: SelectedOption,
+                                    },
+                                ],
+                            },
+                            $set: {
+                                "attendedCategoryDetail.$[category].score": Score,
+                            },
+                        }, {
+                            arrayFilters: [{ "category.categoryId": catId }],
+                            new: true, // Return the modified document
+                        });
+                        return isCorrect;
+                    }
                 }
                 else {
-                    // Retriving existing score from the db
-                    const userCatScore = yield userModel_1.default.findOne({ _id: userId, "attendedCategoryDetail.categoryId": catId }, { "attendedCategoryDetail.score": 1 });
-                    // updating the score
-                    if (userCatScore !== null) {
-                        Score = userCatScore.attendedCategoryDetail[0].score;
-                        isCorrect ? Score++ : Score;
-                    }
-                    // Updating the user document with new data
+                    //Updating Score for the first time
+                    isCorrect ? Score++ : Score;
                     yield userModel_1.default.findByIdAndUpdate({
                         _id: userId,
-                        "attendedCategoryDetail.categoryId": catId,
                     }, {
                         $push: {
-                            "attendedCategoryDetail.$[category].attendedQuestions": [
+                            attendedCategoryDetail: [
                                 {
-                                    questionId: questId,
-                                    selectedOption: SelectedOption,
+                                    categoryId: catId,
+                                    attendedQuestions: [
+                                        {
+                                            questionId: questId,
+                                            selectedOption: SelectedOption,
+                                        },
+                                    ],
+                                    score: Score,
                                 },
                             ],
                         },
-                        $set: {
-                            "attendedCategoryDetail.$[category].score": Score,
-                        },
-                    }, {
-                        arrayFilters: [{ "category.categoryId": catId }],
-                        new: true, // Return the modified document
                     });
                     return isCorrect;
                 }
@@ -226,7 +261,6 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
             else {
                 //Updating Score for the first time
                 isCorrect ? Score++ : Score;
-                console.log(Score);
                 yield userModel_1.default.findByIdAndUpdate({ _id: userId }, {
                     $push: {
                         attendedCategoryDetail: [
