@@ -17,7 +17,7 @@ const quizModel_1 = __importDefault(require("../models/quizModel"));
 const questionModel_1 = __importDefault(require("../models/questionModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const userModel_1 = __importDefault(require("../models/userModel"));
-// Upload Questions handler
+//-----------------Upload Questions handler-----------------
 function uploadQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -86,7 +86,7 @@ function uploadQuestions(req, reply) {
     });
 }
 exports.uploadQuestions = uploadQuestions;
-// Get All Category Handlers
+//-----------------Get All Category Handlers-------------------
 function getAllQuizCategories(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -104,7 +104,7 @@ function getAllQuizCategories(req, reply) {
     });
 }
 exports.getAllQuizCategories = getAllQuizCategories;
-// Get all Questions Handler
+//--------------- Get all Questions Handler----------------------
 function getQuestions(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -126,7 +126,7 @@ function getQuestions(req, reply) {
     });
 }
 exports.getQuestions = getQuestions;
-// Submit Answer handler
+//-------------- Submit Answer handler-----------------------------
 function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -178,7 +178,7 @@ function submitAnswer(req, reply) {
     });
 }
 exports.submitAnswer = submitAnswer;
-// User update helper function
+//----------- User update helper function------------------------
 function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
     return __awaiter(this, void 0, void 0, function* () {
         let Score = 0;

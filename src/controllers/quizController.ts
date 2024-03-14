@@ -40,7 +40,7 @@ type UserType = {
   attendedCategoryDetail: string[];
 };
 
-// Upload Questions handler
+//-----------------Upload Questions handler-----------------
 export async function uploadQuestions(
   req: FastifyRequest,
   reply: FastifyReply
@@ -114,7 +114,7 @@ export async function uploadQuestions(
   }
 }
 
-// Get All Category Handlers
+//-----------------Get All Category Handlers-------------------
 export async function getAllQuizCategories(
   req: FastifyRequest,
   reply: FastifyReply
@@ -132,7 +132,7 @@ export async function getAllQuizCategories(
   }
 }
 
-// Get all Questions Handler
+//--------------- Get all Questions Handler----------------------
 export async function getQuestions(
   req: FastifyRequest<{ Params: ParamsType }>,
   reply: FastifyReply
@@ -156,7 +156,7 @@ export async function getQuestions(
   }
 }
 
-// Submit Answer handler
+//-------------- Submit Answer handler-----------------------------
 export async function submitAnswer(
   req: FastifyRequest<{ Params: ParamsType }>,
   reply: FastifyReply
@@ -221,7 +221,7 @@ export async function submitAnswer(
   }
 }
 
-// User update helper function
+//----------- User update helper function------------------------
 async function updateUser(
   userId: mongoose.Types.ObjectId,
   catId: mongoose.Types.ObjectId,
