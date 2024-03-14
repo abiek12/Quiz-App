@@ -42,7 +42,7 @@ export async function signUp(req: FastifyRequest, reply: FastifyReply) {
         { id: stringNewUserId },
         process.env.SECRET_KEY,
         {
-          expiresIn: "1h",
+          expiresIn: "30m",
         }
       );
       reply.header("Authorization", `Bearer ${token}`);
@@ -90,7 +90,7 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
           { id: stringUserId },
           process.env.SECRET_KEY,
           {
-            expiresIn: "1h",
+            expiresIn: "30m",
           }
         );
         reply.header("Authorization", `Bearer ${token}`);
