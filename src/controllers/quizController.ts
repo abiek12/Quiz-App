@@ -124,7 +124,6 @@ export async function getAllQuizCategories(
     const categories = await Quiz.find({}, { category: 1 });
     return reply.code(200).send({ success: true, categories });
   } catch (error) {
-    console.error("An error occurred:", error);
     reply.code(500).send({
       success: false,
       message: "An error occurred while fetching categories",
@@ -146,7 +145,15 @@ export async function getQuestions(
     const questionDetail: QuizDocument | null = await Quiz.findById({
       _id: categoryId,
     }).populate("questions");
-    return reply.code(200).send({ success: true, questionDetail });
+    if (questionDetail !== null) {
+      return reply.code(200).send({ success: true, questionDetail });
+    } else {
+      return reply.code(404).send({
+        success: false,
+        message:
+          "No questions found! please make sure the category id is correct",
+      });
+    }
   } catch (error) {
     console.error("An error occurred:", error);
     reply.code(500).send({
@@ -213,7 +220,12 @@ export async function submitAnswer(
       SelectedOption,
       isCorrect
     );
-    return reply.send(response);
+    const statuscode = response.statuscode;
+    // const success = response.success;
+    // const result = response.Result;
+    // const message = response.message;
+    // const score = response.TotalScore;
+    return reply.code(statuscode).send({ response });
   } catch (error) {
     console.error("An error occurred:", error);
     reply.code(500).send({
@@ -249,6 +261,7 @@ async function updateUser(
         });
         if (matchedQuestion) {
           return {
+            success: true,
             statuscode: 400,
             message: "You have already attended this question!",
           };
@@ -333,13 +346,14 @@ async function updateUser(
 
           if (UserQuestCount === QuizQuestCount) {
             return {
+              success: true,
               statuscode: 200,
               message: "Completed",
               Result: isCorrect,
               TotalScore: Score,
             };
           } else {
-            return { statuscode: 200, Result: isCorrect };
+            return { success: true, statuscode: 200, Result: isCorrect };
           }
         }
       } else {
@@ -366,7 +380,7 @@ async function updateUser(
             },
           }
         );
-        return { statuscode: 200, Result: isCorrect };
+        return { success: true, statuscode: 200, Result: isCorrect };
       }
     } else {
       //Updating Score for the first time
@@ -390,9 +404,9 @@ async function updateUser(
           },
         }
       );
-      return { statuscode: 200, Result: isCorrect };
+      return { success: true, statuscode: 200, Result: isCorrect };
     }
   } else {
-    return "Unautherised!";
+    return { success: false, statuscode: 401, message: "Unautherised!" };
   }
 }

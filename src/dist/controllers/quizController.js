@@ -95,7 +95,6 @@ function getAllQuizCategories(req, reply) {
             return reply.code(200).send({ success: true, categories });
         }
         catch (error) {
-            console.error("An error occurred:", error);
             reply.code(500).send({
                 success: false,
                 message: "An error occurred while fetching categories",
@@ -114,7 +113,15 @@ function getQuestions(req, reply) {
             const questionDetail = yield quizModel_1.default.findById({
                 _id: categoryId,
             }).populate("questions");
-            return reply.code(200).send({ success: true, questionDetail });
+            if (questionDetail !== null) {
+                return reply.code(200).send({ success: true, questionDetail });
+            }
+            else {
+                return reply.code(404).send({
+                    success: false,
+                    message: "No questions found! please make sure the category id is correct",
+                });
+            }
         }
         catch (error) {
             console.error("An error occurred:", error);
@@ -166,7 +173,12 @@ function submitAnswer(req, reply) {
             }
             // Update User
             const response = yield updateUser(userId, catId, questId, SelectedOption, isCorrect);
-            return reply.send(response);
+            const statuscode = response.statuscode;
+            // const success = response.success;
+            // const result = response.Result;
+            // const message = response.message;
+            // const score = response.TotalScore;
+            return reply.code(statuscode).send({ response });
         }
         catch (error) {
             console.error("An error occurred:", error);
@@ -199,6 +211,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                     });
                     if (matchedQuestion) {
                         return {
+                            success: true,
                             statuscode: 400,
                             message: "You have already attended this question!",
                         };
@@ -274,6 +287,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         const QuizQuestCount = totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
                         if (UserQuestCount === QuizQuestCount) {
                             return {
+                                success: true,
                                 statuscode: 200,
                                 message: "Completed",
                                 Result: isCorrect,
@@ -281,7 +295,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                             };
                         }
                         else {
-                            return { statuscode: 200, Result: isCorrect };
+                            return { success: true, statuscode: 200, Result: isCorrect };
                         }
                     }
                 }
@@ -306,7 +320,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                             ],
                         },
                     });
-                    return { statuscode: 200, Result: isCorrect };
+                    return { success: true, statuscode: 200, Result: isCorrect };
                 }
             }
             else {
@@ -328,11 +342,11 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         ],
                     },
                 });
-                return { statuscode: 200, Result: isCorrect };
+                return { success: true, statuscode: 200, Result: isCorrect };
             }
         }
         else {
-            return "Unautherised!";
+            return { success: false, statuscode: 401, message: "Unautherised!" };
         }
     });
 }
