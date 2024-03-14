@@ -14,31 +14,32 @@ const jwt = require("jsonwebtoken");
 function auth(req, reply) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
-        if (!token) {
-            return reply
-                .code(401)
-                .send({ success: true, message: "You have to login!" });
-        }
-        else {
-            try {
+        try {
+            const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+            if (!token) {
+                return reply.code(401).send({
+                    success: true,
+                    message: "Authentication failed you have to login!",
+                });
+            }
+            else {
                 const decode = yield jwt.verify(token, process.env.SECRET_KEY);
                 if (!decode) {
                     return reply
                         .code(403)
-                        .send({ success: true, message: "You have to login!" });
+                        .send({ success: true, message: "Invalid token!" });
                 }
                 else {
+                    req.user = decode;
                     return;
                 }
             }
-            catch (error) {
-                console.log(error);
-                reply.code(500).send({
-                    success: false,
-                    message: error,
-                });
-            }
+        }
+        catch (error) {
+            reply.code(500).send({
+                success: false,
+                message: error,
+            });
         }
     });
 }
