@@ -137,10 +137,11 @@ exports.getQuestions = getQuestions;
 function submitAnswer(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let { UserId, QuestionId, SelectedOption } = req.body;
-            const userId = new mongoose_1.default.Types.ObjectId(UserId);
-            const questId = new mongoose_1.default.Types.ObjectId(QuestionId);
+            let { QuestionId, SelectedOption } = req.body;
             const catId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            const questId = new mongoose_1.default.Types.ObjectId(QuestionId);
+            const userId = new mongoose_1.default.Types.ObjectId(req.userId);
+            console.log(userId);
             // Initialzing isCorrect as false
             let isCorrect = false;
             SelectedOption = SelectedOption.toLowerCase();

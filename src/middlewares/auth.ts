@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 const jwt = require("jsonwebtoken");
 
 interface CustomRequest extends FastifyRequest {
-  user?: any;
+  userId?: any;
 }
 
 export async function auth(req: CustomRequest, reply: FastifyReply) {
@@ -20,7 +20,7 @@ export async function auth(req: CustomRequest, reply: FastifyReply) {
           .code(403)
           .send({ success: true, message: "Invalid token!" });
       } else {
-        req.user = decode;
+        req.userId = decode.id;
         return;
       }
     }

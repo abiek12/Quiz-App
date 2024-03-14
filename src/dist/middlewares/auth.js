@@ -30,7 +30,7 @@ function auth(req, reply) {
                         .send({ success: true, message: "Invalid token!" });
                 }
                 else {
-                    req.user = decode;
+                    req.userId = decode.id;
                     return;
                 }
             }
