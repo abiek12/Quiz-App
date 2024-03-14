@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = exports.signUp = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const jwt = require("jsonwebtoken");
 function signUp(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -41,8 +41,8 @@ function signUp(req, reply) {
                 const newUserId = newUser._id;
                 const stringNewUserId = newUserId.toString();
                 // json web token creating
-                const token = jsonwebtoken_1.default.sign({ id: stringNewUserId }, "gjsj8s4dbxs", {
-                    expiresIn: "1h",
+                const token = yield jwt.sign({ id: stringNewUserId }, process.env.SECRET_KEY, {
+                    expiresIn: "1hr",
                 });
                 // cookie
                 const options = {
@@ -93,17 +93,12 @@ function login(req, reply) {
                     const newUserId = user._id;
                     const stringUserId = newUserId.toString();
                     // json web token creating
-                    const token = jsonwebtoken_1.default.sign({ id: stringUserId }, "gjsj8s4dbxs", {
-                        expiresIn: "1h",
+                    const token = yield jwt.sign({ id: stringUserId }, process.env.SECRET_KEY, {
+                        expiresIn: "1hr",
                     });
-                    // cookie
-                    const options = {
-                        expiresIn: new Date(Date.now() + 1 * 60 * 60),
-                        httpOnly: true,
-                    };
+                    reply.header("Authorization", `Bearer ${token}`);
                     return reply
                         .code(200)
-                        .cookie("token", token, options)
                         .send({ success: true, message: "Signed in Succesfully" });
                 }
             }

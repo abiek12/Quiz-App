@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const quizController_1 = require("../controllers/quizController");
 const userController_1 = require("../controllers/userController");
+const auth_1 = require("../middlewares/auth");
 function routes(app) {
     return __awaiter(this, void 0, void 0, function* () {
         // Upload Questions
@@ -20,11 +21,11 @@ function routes(app) {
         // User Login
         app.post("/user/login", userController_1.login);
         // Get all quizes
-        app.get("/", quizController_1.getAllQuizCategories);
+        app.get("/", { preHandler: auth_1.auth }, quizController_1.getAllQuizCategories);
         // Participate a quiz
-        app.get("/:id", quizController_1.getQuestions);
+        app.get("/:id", { preHandler: auth_1.auth }, quizController_1.getQuestions);
         // submit quizes
-        app.post("/submit/:id", quizController_1.submitAnswer);
+        app.post("/submit/:id", { preHandler: auth_1.auth }, quizController_1.submitAnswer);
     });
 }
 exports.default = routes;

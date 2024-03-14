@@ -22,7 +22,11 @@ mongoose
     console.log(err);
 });
 // Plugins
-app.register(cookie_1.default);
+app.register(require("@fastify/formbody"));
+app.register(cookie_1.default, {
+    secret: process.env.SECRET_KEY, // for cookies signature
+    parseOptions: {}, // options for parsing cookies
+});
 // Routes
 app.register(routes_1.default, { prefix: "/api/quiz" });
 const PORT = process.env.PORT || 3000;

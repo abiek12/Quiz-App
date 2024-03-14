@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import User from "../models/userModel";
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 
 type UserSignUpDataType = {
   Username: string;
@@ -38,9 +38,13 @@ export async function signUp(req: FastifyRequest, reply: FastifyReply) {
       const newUserId: mongoose.Types.ObjectId = newUser._id;
       const stringNewUserId = newUserId.toString();
       // json web token creating
-      const token = jwt.sign({ id: stringNewUserId }, "gjsj8s4dbxs", {
-        expiresIn: "1h",
-      });
+      const token = await jwt.sign(
+        { id: stringNewUserId },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: "1hr",
+        }
+      );
       // cookie
       const options = {
         expiresIn: new Date(Date.now() + 1 * 60 * 60),
@@ -85,18 +89,18 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
       } else {
         const newUserId: mongoose.Types.ObjectId = user._id;
         const stringUserId = newUserId.toString();
+
         // json web token creating
-        const token = jwt.sign({ id: stringUserId }, "gjsj8s4dbxs", {
-          expiresIn: "1h",
-        });
-        // cookie
-        const options = {
-          expiresIn: new Date(Date.now() + 1 * 60 * 60),
-          httpOnly: true,
-        };
+        const token = await jwt.sign(
+          { id: stringUserId },
+          process.env.SECRET_KEY,
+          {
+            expiresIn: "1hr",
+          }
+        );
+        reply.header("Authorization", `Bearer ${token}`);
         return reply
           .code(200)
-          .cookie("token", token, options)
           .send({ success: true, message: "Signed in Succesfully" });
       }
     }
