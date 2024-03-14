@@ -198,7 +198,10 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         "attendedCategoryDetail.attendedQuestions.questionId": questId,
                     });
                     if (matchedQuestion) {
-                        return "You have already attended this question!";
+                        return {
+                            statuscode: 400,
+                            message: "You have already attended this question!",
+                        };
                     }
                     else {
                         // Retriving existing score of the perticular category from the user document
@@ -270,10 +273,15 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         // Extract the count from the result
                         const QuizQuestCount = totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
                         if (UserQuestCount === QuizQuestCount) {
-                            return { isCorrect, Score };
+                            return {
+                                statuscode: 200,
+                                message: "Completed",
+                                Result: isCorrect,
+                                TotalScore: Score,
+                            };
                         }
                         else {
-                            return isCorrect;
+                            return { statuscode: 200, Result: isCorrect };
                         }
                     }
                 }
@@ -298,7 +306,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                             ],
                         },
                     });
-                    return isCorrect;
+                    return { statuscode: 200, Result: isCorrect };
                 }
             }
             else {
@@ -320,7 +328,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         ],
                     },
                 });
-                return isCorrect;
+                return { statuscode: 200, Result: isCorrect };
             }
         }
         else {

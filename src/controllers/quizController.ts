@@ -248,7 +248,10 @@ async function updateUser(
           "attendedCategoryDetail.attendedQuestions.questionId": questId,
         });
         if (matchedQuestion) {
-          return "You have already attended this question!";
+          return {
+            statuscode: 400,
+            message: "You have already attended this question!",
+          };
         } else {
           // Retriving existing score of the perticular category from the user document
           const userCatScore = await User.aggregate([
@@ -329,9 +332,14 @@ async function updateUser(
             totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
 
           if (UserQuestCount === QuizQuestCount) {
-            return { isCorrect, Score };
+            return {
+              statuscode: 200,
+              message: "Completed",
+              Result: isCorrect,
+              TotalScore: Score,
+            };
           } else {
-            return isCorrect;
+            return { statuscode: 200, Result: isCorrect };
           }
         }
       } else {
@@ -358,7 +366,7 @@ async function updateUser(
             },
           }
         );
-        return isCorrect;
+        return { statuscode: 200, Result: isCorrect };
       }
     } else {
       //Updating Score for the first time
@@ -382,7 +390,7 @@ async function updateUser(
           },
         }
       );
-      return isCorrect;
+      return { statuscode: 200, Result: isCorrect };
     }
   } else {
     return "Unautherised!";
