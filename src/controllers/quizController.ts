@@ -193,14 +193,16 @@ export async function submitAnswer(
         // If no matching question is found, send an appropriate error response
         return reply.code(404).send({
           success: false,
-          message: "Question not found/Incorrect!",
+          message:
+            "Question not found/Incorrect! make sure question id correct",
         });
       }
     } else {
       // If no matching category is found, send an appropriate error response
       return reply.code(404).send({
         success: false,
-        message: "Category not found/Incorrect!",
+        message:
+          "Category not found/Incorrect! make sure category id is correct",
       });
     }
     // Update User
@@ -285,7 +287,52 @@ async function updateUser(
               new: true, // Return the modified document
             }
           );
-          return isCorrect;
+
+          // Retriving no of attended questions
+          const result = await User.aggregate([
+            {
+              $match: { _id: userId }, // Filter by user ID
+            },
+            {
+              $unwind: "$attendedCategoryDetail", // Unwind attendedCategoryDetail array
+            },
+            {
+              $match: {
+                "attendedCategoryDetail.categoryId": catId,
+              }, // Filter by category ID
+            },
+            {
+              $project: {
+                numberOfQuestions: {
+                  $size: "$attendedCategoryDetail.attendedQuestions",
+                }, // Count the number of objects in attendedQuestions array
+              },
+            },
+          ]);
+          // Extract the count from the result
+          const UserQuestCount =
+            result.length > 0 ? result[0].numberOfQuestions : 0;
+
+          // No of questions in category
+          const totalQuest = await Quiz.aggregate([
+            {
+              $match: { _id: catId }, // Filter by category ID
+            },
+            {
+              $project: {
+                numberOfQuestions: { $size: "$questions" },
+              },
+            },
+          ]);
+          // Extract the count from the result
+          const QuizQuestCount =
+            totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
+
+          if (UserQuestCount === QuizQuestCount) {
+            return { isCorrect, Score };
+          } else {
+            return isCorrect;
+          }
         }
       } else {
         //Updating Score for the first time
