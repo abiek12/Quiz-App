@@ -174,14 +174,9 @@ function submitAnswer(req, reply) {
             // Update User
             const response = yield updateUser(userId, catId, questId, SelectedOption, isCorrect);
             const statuscode = response.statuscode;
-            // const success = response.success;
-            // const result = response.Result;
-            // const message = response.message;
-            // const score = response.TotalScore;
-            return reply.code(statuscode).send({ response });
+            return reply.code(statuscode).send(response);
         }
         catch (error) {
-            console.error("An error occurred:", error);
             reply.code(500).send({
                 success: false,
                 message: `An error occurred while submitting answer!, ${error}`,
@@ -211,8 +206,8 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                     });
                     if (matchedQuestion) {
                         return {
-                            success: true,
                             statuscode: 400,
+                            success: true,
                             message: "You have already attended this question!",
                         };
                     }
@@ -287,10 +282,10 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         const QuizQuestCount = totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
                         if (UserQuestCount === QuizQuestCount) {
                             return {
-                                success: true,
                                 statuscode: 200,
-                                message: "Completed",
+                                success: true,
                                 Result: isCorrect,
+                                message: "Completed",
                                 TotalScore: Score,
                             };
                         }
@@ -346,7 +341,11 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
             }
         }
         else {
-            return { success: false, statuscode: 401, message: "Unautherised!" };
+            return {
+                statuscode: 401,
+                success: false,
+                message: "Unautherised! you have to login",
+            };
         }
     });
 }
