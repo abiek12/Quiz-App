@@ -13,10 +13,7 @@ const app = fastify({
 });
 // Connection
 mongoose
-    .connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+    .connect(MONGODB_URI)
     .then(() => {
     console.log("Successfully connected to mongoDB");
 })
