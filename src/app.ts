@@ -4,7 +4,7 @@ const fastify = require("fastify");
 const mongoose = require("mongoose");
 
 require("dotenv").config();
-const db_url: string | undefined = process.env.DB_URI;
+const MONGODB_URI = process.env.DB_URI as string;
 
 const app: FastifyInstance = fastify({
   logger: true,
@@ -12,7 +12,10 @@ const app: FastifyInstance = fastify({
 
 // Connection
 mongoose
-  .connect(db_url)
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Successfully connected to mongoDB");
   })

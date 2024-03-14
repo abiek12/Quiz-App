@@ -7,13 +7,16 @@ const routes_1 = __importDefault(require("./routes/routes"));
 const fastify = require("fastify");
 const mongoose = require("mongoose");
 require("dotenv").config();
-const db_url = process.env.DB_URI;
+const MONGODB_URI = process.env.DB_URI;
 const app = fastify({
     logger: true,
 });
 // Connection
 mongoose
-    .connect(db_url)
+    .connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
     .then(() => {
     console.log("Successfully connected to mongoDB");
 })
