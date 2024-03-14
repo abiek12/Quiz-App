@@ -39,9 +39,9 @@ function signUp(req, reply) {
                     password: hashedPassword,
                 });
                 const newUserId = newUser._id;
-                const stringUserId = newUserId.toString();
+                const stringNewUserId = newUserId.toString();
                 // json web token creating
-                const token = jsonwebtoken_1.default.sign({ id: stringUserId }, "gjsj8s4dbxs", {
+                const token = jsonwebtoken_1.default.sign({ id: stringNewUserId }, "gjsj8s4dbxs", {
                     expiresIn: "1h",
                 });
                 // cookie
@@ -90,8 +90,20 @@ function login(req, reply) {
                         .send({ success: false, message: "Authentication Failed!" });
                 }
                 else {
+                    const newUserId = user._id;
+                    const stringUserId = newUserId.toString();
+                    // json web token creating
+                    const token = jsonwebtoken_1.default.sign({ id: stringUserId }, "gjsj8s4dbxs", {
+                        expiresIn: "1h",
+                    });
+                    // cookie
+                    const options = {
+                        expiresIn: new Date(Date.now() + 1 * 60 * 60),
+                        httpOnly: true,
+                    };
                     return reply
                         .code(200)
+                        .cookie("token", token, options)
                         .send({ success: true, message: "Signed in Succesfully" });
                 }
             }

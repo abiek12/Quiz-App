@@ -36,9 +36,9 @@ export async function signUp(req: FastifyRequest, reply: FastifyReply) {
         password: hashedPassword,
       });
       const newUserId: mongoose.Types.ObjectId = newUser._id;
-      const stringUserId = newUserId.toString();
+      const stringNewUserId = newUserId.toString();
       // json web token creating
-      const token = jwt.sign({ id: stringUserId }, "gjsj8s4dbxs", {
+      const token = jwt.sign({ id: stringNewUserId }, "gjsj8s4dbxs", {
         expiresIn: "1h",
       });
       // cookie
@@ -46,7 +46,6 @@ export async function signUp(req: FastifyRequest, reply: FastifyReply) {
         expiresIn: new Date(Date.now() + 1 * 60 * 60),
         httpOnly: true,
       };
-
       return reply
         .code(201)
         .cookie("token", token, options)
@@ -84,8 +83,20 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
           .code(401)
           .send({ success: false, message: "Authentication Failed!" });
       } else {
+        const newUserId: mongoose.Types.ObjectId = user._id;
+        const stringUserId = newUserId.toString();
+        // json web token creating
+        const token = jwt.sign({ id: stringUserId }, "gjsj8s4dbxs", {
+          expiresIn: "1h",
+        });
+        // cookie
+        const options = {
+          expiresIn: new Date(Date.now() + 1 * 60 * 60),
+          httpOnly: true,
+        };
         return reply
           .code(200)
+          .cookie("token", token, options)
           .send({ success: true, message: "Signed in Succesfully" });
       }
     }
