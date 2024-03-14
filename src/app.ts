@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import routes from "./routes/routes";
+import fastifyCookie from "@fastify/cookie";
 const fastify = require("fastify");
 const mongoose = require("mongoose");
 
@@ -21,7 +22,7 @@ mongoose
   });
 
 // Plugins
-
+app.register(fastifyCookie);
 // Routes
 app.register(routes, { prefix: "/api/quiz" });
 

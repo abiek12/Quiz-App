@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = exports.signUp = void 0;
 const userModel_1 = __importDefault(require("../models/userModel"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function signUp(req, reply) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -32,13 +33,25 @@ function signUp(req, reply) {
             }
             else {
                 const hashedPassword = yield bcrypt_1.default.hash(Password, 10);
-                yield userModel_1.default.create({
+                const newUser = yield userModel_1.default.create({
                     userName: Username,
                     email: Email,
                     password: hashedPassword,
                 });
+                const newUserId = newUser._id;
+                const stringUserId = newUserId.toString();
+                // json web token creating
+                const token = jsonwebtoken_1.default.sign({ id: stringUserId }, "gjsj8s4dbxs", {
+                    expiresIn: "1h",
+                });
+                // cookie
+                const options = {
+                    expiresIn: new Date(Date.now() + 1 * 60 * 60),
+                    httpOnly: true,
+                };
                 return reply
                     .code(201)
+                    .cookie("token", token, options)
                     .send({ success: true, message: "User created succesfully" });
             }
         }

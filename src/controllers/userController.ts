@@ -1,6 +1,8 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import User from "../models/userModel";
 import bcrypt from "bcrypt";
+import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
 
 type UserSignUpDataType = {
   Username: string;
@@ -28,13 +30,26 @@ export async function signUp(req: FastifyRequest, reply: FastifyReply) {
         .send({ success: false, message: "User Already Exist!" });
     } else {
       const hashedPassword = await bcrypt.hash(Password, 10);
-      await User.create({
+      const newUser = await User.create({
         userName: Username,
         email: Email,
         password: hashedPassword,
       });
+      const newUserId: mongoose.Types.ObjectId = newUser._id;
+      const stringUserId = newUserId.toString();
+      // json web token creating
+      const token = jwt.sign({ id: stringUserId }, "gjsj8s4dbxs", {
+        expiresIn: "1h",
+      });
+      // cookie
+      const options = {
+        expiresIn: new Date(Date.now() + 1 * 60 * 60),
+        httpOnly: true,
+      };
+
       return reply
         .code(201)
+        .cookie("token", token, options)
         .send({ success: true, message: "User created succesfully" });
     }
   } catch (error) {

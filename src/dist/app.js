@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const routes_1 = __importDefault(require("./routes/routes"));
+const cookie_1 = __importDefault(require("@fastify/cookie"));
 const fastify = require("fastify");
 const mongoose = require("mongoose");
 require("dotenv").config();
@@ -21,6 +22,7 @@ mongoose
     console.log(err);
 });
 // Plugins
+app.register(cookie_1.default);
 // Routes
 app.register(routes_1.default, { prefix: "/api/quiz" });
 const PORT = process.env.PORT || 3000;
