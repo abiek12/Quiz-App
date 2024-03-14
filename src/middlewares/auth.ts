@@ -16,7 +16,6 @@ export async function auth(req: FastifyRequest, reply: FastifyReply) {
           .code(403)
           .send({ success: true, message: "You have to login!" });
       } else {
-        // req.user = decode;
         return;
       }
     } catch (error) {

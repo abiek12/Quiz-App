@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const routes_1 = __importDefault(require("./routes/routes"));
-const cookie_1 = __importDefault(require("@fastify/cookie"));
 const fastify = require("fastify");
 const mongoose = require("mongoose");
 require("dotenv").config();
@@ -23,10 +22,6 @@ mongoose
 });
 // Plugins
 app.register(require("@fastify/formbody"));
-app.register(cookie_1.default, {
-    secret: process.env.SECRET_KEY, // for cookies signature
-    parseOptions: {}, // options for parsing cookies
-});
 // Routes
 app.register(routes_1.default, { prefix: "/api/quiz" });
 const PORT = process.env.PORT || 3000;

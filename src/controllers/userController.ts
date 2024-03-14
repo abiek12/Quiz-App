@@ -42,17 +42,12 @@ export async function signUp(req: FastifyRequest, reply: FastifyReply) {
         { id: stringNewUserId },
         process.env.SECRET_KEY,
         {
-          expiresIn: "1hr",
+          expiresIn: "1h",
         }
       );
-      // cookie
-      const options = {
-        expiresIn: new Date(Date.now() + 1 * 60 * 60),
-        httpOnly: true,
-      };
+      reply.header("Authorization", `Bearer ${token}`);
       return reply
         .code(201)
-        .cookie("token", token, options)
         .send({ success: true, message: "User created succesfully" });
     }
   } catch (error) {
@@ -95,7 +90,7 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
           { id: stringUserId },
           process.env.SECRET_KEY,
           {
-            expiresIn: "1hr",
+            expiresIn: "1h",
           }
         );
         reply.header("Authorization", `Bearer ${token}`);

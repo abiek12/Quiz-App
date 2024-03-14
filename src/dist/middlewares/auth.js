@@ -29,7 +29,6 @@ function auth(req, reply) {
                         .send({ success: true, message: "You have to login!" });
                 }
                 else {
-                    // req.user = decode;
                     return;
                 }
             }
