@@ -8,7 +8,7 @@
     "watch": "tsc -w",
     "dev": "nodemon src/dist/app.js",
     "build": "tsc",
-    "start": "node dist/src/dist/app.js"
+    "start": "node src/dist/app.js"
   },
   "author": "Abhishek pp",
   "license": "ISC",
