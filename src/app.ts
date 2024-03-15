@@ -30,15 +30,12 @@ const PORT: string | number = process.env.PORT || 3000;
 
 // Starting server
 try {
-  fastify.listen(
-    { port: 3000, host: "0.0.0.0" },
-    (err: FastifyError, address: any) => {
-      if (err) {
-        fastify.log.error(err);
-        process.exit(1);
-      }
+  app.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
+    if (err) {
+      app.log.error(err);
+      process.exit(1);
     }
-  );
+  });
 } catch (error) {
   app.log.error(error);
   process.exit(1);
