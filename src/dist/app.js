@@ -24,7 +24,7 @@ mongoose
 app.register(require("@fastify/formbody"));
 // Routes
 app.register(routes_1.default, { prefix: "/quiz" });
-const PORT = process.env.PORT || 3000;
+// const PORT: string | number = process.env.PORT || 3000;
 // Starting server
 try {
     app.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {

@@ -182,7 +182,7 @@ export async function submitAnswer(
     );
     // const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(UserId);
     const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-      req.userId
+      req.userId as string
     );
 
     // Initialzing isCorrect as false
