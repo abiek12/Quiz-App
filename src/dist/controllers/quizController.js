@@ -140,8 +140,8 @@ function submitAnswer(req, reply) {
             let { QuestionId, SelectedOption } = req.body;
             const catId = new mongoose_1.default.Types.ObjectId(req.params.id);
             const questId = new mongoose_1.default.Types.ObjectId(QuestionId);
+            // const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(UserId);
             const userId = new mongoose_1.default.Types.ObjectId(req.userId);
-            console.log(userId);
             // Initialzing isCorrect as false
             let isCorrect = false;
             SelectedOption = SelectedOption.toLowerCase();

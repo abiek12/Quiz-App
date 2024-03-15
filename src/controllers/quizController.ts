@@ -180,10 +180,10 @@ export async function submitAnswer(
     const questId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       QuestionId
     );
+    // const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(UserId);
     const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       req.userId
     );
-    console.log(userId);
 
     // Initialzing isCorrect as false
     let isCorrect: boolean = false;
