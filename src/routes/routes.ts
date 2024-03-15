@@ -9,7 +9,7 @@ import { signUp, login } from "../controllers/userController";
 import { auth } from "../middlewares/auth";
 async function routes(app: FastifyInstance) {
   // Upload Questions
-  app.post("/upload", uploadQuestions);
+  app.post("/upload", { preHandler: auth }, uploadQuestions);
   // User Signup
   app.post("/user/signup", signUp);
   // User Login

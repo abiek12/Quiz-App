@@ -42,16 +42,11 @@ function signUp(req, reply) {
                 const stringNewUserId = newUserId.toString();
                 // json web token creating
                 const token = yield jwt.sign({ id: stringNewUserId }, process.env.SECRET_KEY, {
-                    expiresIn: "1hr",
+                    expiresIn: "30m",
                 });
-                // cookie
-                const options = {
-                    expiresIn: new Date(Date.now() + 1 * 60 * 60),
-                    httpOnly: true,
-                };
+                reply.header("Authorization", `Bearer ${token}`);
                 return reply
                     .code(201)
-                    .cookie("token", token, options)
                     .send({ success: true, message: "User created succesfully" });
             }
         }
@@ -94,7 +89,7 @@ function login(req, reply) {
                     const stringUserId = newUserId.toString();
                     // json web token creating
                     const token = yield jwt.sign({ id: stringUserId }, process.env.SECRET_KEY, {
-                        expiresIn: "1hr",
+                        expiresIn: "30m",
                     });
                     reply.header("Authorization", `Bearer ${token}`);
                     return reply

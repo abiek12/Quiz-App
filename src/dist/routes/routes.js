@@ -15,7 +15,7 @@ const auth_1 = require("../middlewares/auth");
 function routes(app) {
     return __awaiter(this, void 0, void 0, function* () {
         // Upload Questions
-        app.post("/upload", quizController_1.uploadQuestions);
+        app.post("/upload", { preHandler: auth_1.auth }, quizController_1.uploadQuestions);
         // User Signup
         app.post("/user/signup", userController_1.signUp);
         // User Login

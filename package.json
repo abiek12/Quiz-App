@@ -17,7 +17,6 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@fastify/cookie": "^9.3.1",
     "@fastify/formbody": "^7.4.0",
     "@types/node": "^20.11.24",
     "bcrypt": "^5.1.1",

@@ -40,6 +40,10 @@ type UserType = {
   attendedCategoryDetail: string[];
 };
 
+interface CustomRequest<T> extends FastifyRequest {
+  userId?: any; // Define the 'user' property here
+}
+
 //-----------------Upload Questions handler-----------------
 export async function uploadQuestions(
   req: FastifyRequest,
@@ -165,18 +169,22 @@ export async function getQuestions(
 
 //-------------- Submit Answer handler-----------------------------
 export async function submitAnswer(
-  req: FastifyRequest<{ Params: ParamsType }>,
+  req: CustomRequest<{ Params: ParamsType }>,
   reply: FastifyReply
 ) {
   try {
-    let { UserId, QuestionId, SelectedOption } = req.body as AnswerSubmitType;
-    const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(UserId);
+    let { QuestionId, SelectedOption } = req.body as AnswerSubmitType;
+    const catId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
+      (req.params as ParamsType).id
+    );
     const questId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
       QuestionId
     );
-    const catId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
-      req.params.id
+    const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
+      req.userId
     );
+    console.log(userId);
+
     // Initialzing isCorrect as false
     let isCorrect: boolean = false;
     SelectedOption = SelectedOption.toLowerCase();
