@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyError, FastifyInstance } from "fastify";
 import routes from "./routes/routes";
 const fastify = require("fastify");
 const mongoose = require("mongoose");
@@ -30,9 +30,15 @@ const PORT: string | number = process.env.PORT || 3000;
 
 // Starting server
 try {
-  app.listen(PORT, () => {
-    console.log(`Server running at ${PORT}`);
-  });
+  fastify.listen(
+    { port: 3000, host: "0.0.0.0" },
+    (err: FastifyError, address: any) => {
+      if (err) {
+        fastify.log.error(err);
+        process.exit(1);
+      }
+    }
+  );
 } catch (error) {
   app.log.error(error);
   process.exit(1);

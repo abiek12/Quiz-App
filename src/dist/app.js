@@ -27,11 +27,15 @@ app.register(routes_1.default, { prefix: "/quiz" });
 const PORT = process.env.PORT || 3000;
 // Starting server
 try {
-    app.listen(PORT, () => {
-        console.log(`Server running at ${PORT}`);
+    fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
+        if (err) {
+            fastify.log.error(err);
+            process.exit(1);
+        }
     });
 }
 catch (error) {
     app.log.error(error);
     process.exit(1);
 }
+// export default app;
