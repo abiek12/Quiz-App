@@ -23,7 +23,7 @@ mongoose
 // Plugins
 app.register(require("@fastify/formbody"));
 // Routes
-app.register(routes_1.default, { prefix: "/api/quiz" });
+app.register(routes_1.default, { prefix: "/quiz" });
 const PORT = process.env.PORT || 3000;
 // Starting server
 try {

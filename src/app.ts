@@ -24,7 +24,7 @@ mongoose
 app.register(require("@fastify/formbody"));
 
 // Routes
-app.register(routes, { prefix: "/api/quiz" });
+app.register(routes, { prefix: "/quiz" });
 
 const PORT: string | number = process.env.PORT || 3000;
 
