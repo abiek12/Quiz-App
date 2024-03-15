@@ -29,13 +29,13 @@ app.register(routes, { prefix: "/quiz" });
 const PORT: string | number = process.env.PORT || 3000;
 
 // Starting server
-// try {
-//   app.listen(PORT, () => {
-//     console.log(`Server running at ${PORT}`);
-//   });
-// } catch (error) {
-//   app.log.error(error);
-//   process.exit(1);
-// }
+try {
+  app.listen(PORT, () => {
+    console.log(`Server running at ${PORT}`);
+  });
+} catch (error) {
+  app.log.error(error);
+  process.exit(1);
+}
 
 export default app;

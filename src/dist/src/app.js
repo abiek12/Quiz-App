@@ -26,12 +26,13 @@ app.register(require("@fastify/formbody"));
 app.register(routes_1.default, { prefix: "/quiz" });
 const PORT = process.env.PORT || 3000;
 // Starting server
-// try {
-//   app.listen(PORT, () => {
-//     console.log(`Server running at ${PORT}`);
-//   });
-// } catch (error) {
-//   app.log.error(error);
-//   process.exit(1);
-// }
+try {
+    app.listen(PORT, () => {
+        console.log(`Server running at ${PORT}`);
+    });
+}
+catch (error) {
+    app.log.error(error);
+    process.exit(1);
+}
 exports.default = app;
