@@ -42,7 +42,7 @@ function signUp(req, reply) {
                 const stringNewUserId = newUserId.toString();
                 // json web token creating
                 const token = yield jwt.sign({ id: stringNewUserId }, process.env.SECRET_KEY, {
-                    expiresIn: "30m",
+                    expiresIn: "1h",
                 });
                 reply.header("Authorization", `Bearer ${token}`);
                 return reply
@@ -89,7 +89,7 @@ function login(req, reply) {
                     const stringUserId = newUserId.toString();
                     // json web token creating
                     const token = yield jwt.sign({ id: stringUserId }, process.env.SECRET_KEY, {
-                        expiresIn: "30m",
+                        expiresIn: "1h",
                     });
                     reply.header("Authorization", `Bearer ${token}`);
                     return reply

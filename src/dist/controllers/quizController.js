@@ -189,153 +189,122 @@ exports.submitAnswer = submitAnswer;
 //----------- User update helper function------------------------
 function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
     return __awaiter(this, void 0, void 0, function* () {
-        let Score = 0;
         // Retriving user from user collection
         const user = yield userModel_1.default.findOne({ _id: userId });
         if (user != null) {
-            // Checking if the user already attended the question
-            if (user.attendedCategoryDetail.length !== 0) {
-                // Checking wheather the category is exist
-                const matchedCategory = yield userModel_1.default.findOne({
-                    "attendedCategoryDetail.categoryId": catId,
+            let Score = 0;
+            // Checking wheather the category is exist
+            const matchedCategory = yield user.attendedCategoryDetail.find((detail) => detail.categoryId.equals(catId));
+            if (matchedCategory) {
+                // Checking wheather the question is exist
+                const matchedQuestion = yield userModel_1.default.findOne({
+                    _id: userId,
+                    "attendedCategoryDetail.attendedQuestions.questionId": questId,
                 });
-                if (matchedCategory) {
-                    // Checking wheather the question is exist
-                    const matchedQuestion = yield userModel_1.default.findOne({
-                        _id: userId,
-                        "attendedCategoryDetail.attendedQuestions.questionId": questId,
-                    });
-                    if (matchedQuestion) {
-                        return {
-                            statuscode: 400,
-                            success: true,
-                            message: "You have already attended this question!",
-                        };
-                    }
-                    else {
-                        // Retriving existing score of the perticular category from the user document
-                        const userCatScore = yield userModel_1.default.aggregate([
-                            { $match: { _id: userId } }, // Match the user by ID
-                            { $unwind: "$attendedCategoryDetail" }, // Unwind the attendedCategoryDetail array
-                            { $match: { "attendedCategoryDetail.categoryId": catId } }, // Match the category by ID
-                            { $project: { _id: 0, score: "$attendedCategoryDetail.score" } }, // Project only the score
-                        ]);
-                        // updating the score
-                        if (userCatScore !== null) {
-                            Score = userCatScore[0].score;
-                            isCorrect ? Score++ : Score;
-                        }
-                        // Updating the user document with new data
-                        yield userModel_1.default.findByIdAndUpdate({
-                            _id: userId,
-                            "attendedCategoryDetail.categoryId": catId,
-                        }, {
-                            $push: {
-                                "attendedCategoryDetail.$[category].attendedQuestions": [
-                                    {
-                                        questionId: questId,
-                                        selectedOption: SelectedOption,
-                                    },
-                                ],
-                            },
-                            $set: {
-                                "attendedCategoryDetail.$[category].score": Score,
-                            },
-                        }, {
-                            arrayFilters: [{ "category.categoryId": catId }],
-                            new: true, // Return the modified document
-                        });
-                        // Retriving no of attended questions
-                        const result = yield userModel_1.default.aggregate([
-                            {
-                                $match: { _id: userId }, // Filter by user ID
-                            },
-                            {
-                                $unwind: "$attendedCategoryDetail", // Unwind attendedCategoryDetail array
-                            },
-                            {
-                                $match: {
-                                    "attendedCategoryDetail.categoryId": catId,
-                                }, // Filter by category ID
-                            },
-                            {
-                                $project: {
-                                    numberOfQuestions: {
-                                        $size: "$attendedCategoryDetail.attendedQuestions",
-                                    }, // Count the number of objects in attendedQuestions array
-                                },
-                            },
-                        ]);
-                        // Extract the count from the result
-                        const UserQuestCount = result.length > 0 ? result[0].numberOfQuestions : 0;
-                        // No of questions in category
-                        const totalQuest = yield quizModel_1.default.aggregate([
-                            {
-                                $match: { _id: catId }, // Filter by category ID
-                            },
-                            {
-                                $project: {
-                                    numberOfQuestions: { $size: "$questions" },
-                                },
-                            },
-                        ]);
-                        // Extract the count from the result
-                        const QuizQuestCount = totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
-                        if (UserQuestCount === QuizQuestCount) {
-                            return {
-                                statuscode: 200,
-                                success: true,
-                                Result: isCorrect,
-                                message: "Completed",
-                                TotalScore: Score,
-                            };
-                        }
-                        else {
-                            return { success: true, statuscode: 200, Result: isCorrect };
-                        }
-                    }
+                if (matchedQuestion) {
+                    return {
+                        statuscode: 400,
+                        success: true,
+                        message: "You have already attended this question!",
+                    };
                 }
                 else {
-                    //Updating Score for the first time
-                    isCorrect ? Score++ : Score;
+                    // Retriving existing score of the perticular category from the user document
+                    const userCatScore = yield userModel_1.default.aggregate([
+                        { $match: { _id: userId } }, // Match the user by ID
+                        { $unwind: "$attendedCategoryDetail" }, // Unwind the attendedCategoryDetail array
+                        { $match: { "attendedCategoryDetail.categoryId": catId } }, // Match the category by ID
+                        { $project: { _id: 0, score: "$attendedCategoryDetail.score" } }, // Project only the score
+                    ]);
+                    // updating the score
+                    if (userCatScore !== null) {
+                        Score = userCatScore[0].score;
+                        isCorrect ? Score++ : Score;
+                    }
+                    // Updating the user document with new data
                     yield userModel_1.default.findByIdAndUpdate({
                         _id: userId,
+                        "attendedCategoryDetail.categoryId": catId,
                     }, {
                         $push: {
-                            attendedCategoryDetail: [
+                            "attendedCategoryDetail.$[category].attendedQuestions": [
                                 {
-                                    categoryId: catId,
-                                    attendedQuestions: [
-                                        {
-                                            questionId: questId,
-                                            selectedOption: SelectedOption,
-                                        },
-                                    ],
-                                    score: Score,
+                                    questionId: questId,
+                                    selectedOption: SelectedOption,
                                 },
                             ],
                         },
+                        $set: {
+                            "attendedCategoryDetail.$[category].score": Score,
+                        },
+                    }, {
+                        arrayFilters: [{ "category.categoryId": catId }],
+                        new: true, // Return the modified document
                     });
-                    return { success: true, statuscode: 200, Result: isCorrect };
+                    // Retriving no of attended questions
+                    const result = yield userModel_1.default.aggregate([
+                        {
+                            $match: { _id: userId }, // Filter by user ID
+                        },
+                        {
+                            $unwind: "$attendedCategoryDetail", // Unwind attendedCategoryDetail array
+                        },
+                        {
+                            $match: {
+                                "attendedCategoryDetail.categoryId": catId,
+                            }, // Filter by category ID
+                        },
+                        {
+                            $project: {
+                                numberOfQuestions: {
+                                    $size: "$attendedCategoryDetail.attendedQuestions",
+                                }, // Count the number of objects in attendedQuestions array
+                            },
+                        },
+                    ]);
+                    // Extract the count from the result
+                    const UserQuestCount = result.length > 0 ? result[0].numberOfQuestions : 0;
+                    // No of questions in category
+                    const totalQuest = yield quizModel_1.default.aggregate([
+                        {
+                            $match: { _id: catId }, // Filter by category ID
+                        },
+                        {
+                            $project: {
+                                numberOfQuestions: { $size: "$questions" },
+                            },
+                        },
+                    ]);
+                    // Extract the count from the result
+                    const QuizQuestCount = totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
+                    if (UserQuestCount === QuizQuestCount) {
+                        return {
+                            statuscode: 200,
+                            success: true,
+                            Result: isCorrect,
+                            message: "Completed",
+                            TotalScore: Score,
+                        };
+                    }
+                    else {
+                        return { success: true, statuscode: 200, Result: isCorrect };
+                    }
                 }
             }
             else {
                 //Updating Score for the first time
-                isCorrect ? Score++ : Score;
-                yield userModel_1.default.findByIdAndUpdate({ _id: userId }, {
+                if (isCorrect)
+                    Score++;
+                yield userModel_1.default.findByIdAndUpdate(userId, {
                     $push: {
-                        attendedCategoryDetail: [
-                            {
-                                categoryId: catId,
-                                attendedQuestions: [
-                                    {
-                                        questionId: questId,
-                                        selectedOption: SelectedOption,
-                                    },
-                                ],
-                                score: Score,
+                        attendedCategoryDetail: {
+                            categoryId: catId,
+                            attendedQuestions: {
+                                questionId: questId,
+                                selectedOption: SelectedOption,
                             },
-                        ],
+                            score: Score,
+                        },
                     },
                 });
                 return { success: true, statuscode: 200, Result: isCorrect };
