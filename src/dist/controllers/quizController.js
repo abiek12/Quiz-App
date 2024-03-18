@@ -30,17 +30,18 @@ function uploadQuestions(req, reply) {
             }
             // Converting all data to lowercase
             Category = Category.toLowerCase();
+            const modified_Category = Category.replace(/\s/g, "");
             Question = Question.toLowerCase();
             Options = Options.map((option) => option.toLowerCase());
             Answer = Answer.toLowerCase();
             // checking incoming question category allready exist
             const existngCategory = yield quizModel_1.default.findOne({
-                category: Category,
+                category: modified_Category,
             });
             // Creating a new category
             if (existngCategory == null) {
                 yield quizModel_1.default.create({
-                    category: Category,
+                    category: modified_Category,
                     questions: [],
                 });
                 const questionDetails = yield questionModel_1.default.create({
@@ -48,7 +49,7 @@ function uploadQuestions(req, reply) {
                     options: Options,
                     answer: Answer,
                 });
-                yield quizModel_1.default.updateOne({ category: Category }, { $push: { questions: questionDetails._id } });
+                yield quizModel_1.default.updateOne({ category: modified_Category }, { $push: { questions: questionDetails._id } });
                 return reply
                     .code(200)
                     .send({ success: true, message: `new ${Category} quiz created` });

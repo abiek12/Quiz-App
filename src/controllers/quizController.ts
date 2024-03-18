@@ -70,17 +70,18 @@ export async function uploadQuestions(
     }
     // Converting all data to lowercase
     Category = Category.toLowerCase();
+    const modified_Category = Category.replace(/\s/g, "");
     Question = Question.toLowerCase();
     Options = Options.map((option) => option.toLowerCase());
     Answer = Answer.toLowerCase();
     // checking incoming question category allready exist
     const existngCategory: QuizDocument | null = await Quiz.findOne({
-      category: Category,
+      category: modified_Category,
     });
     // Creating a new category
     if (existngCategory == null) {
       await Quiz.create({
-        category: Category,
+        category: modified_Category,
         questions: [],
       });
       const questionDetails = await Quest.create({
@@ -89,7 +90,7 @@ export async function uploadQuestions(
         answer: Answer,
       });
       await Quiz.updateOne(
-        { category: Category },
+        { category: modified_Category },
         { $push: { questions: questionDetails._id } }
       );
       return reply
