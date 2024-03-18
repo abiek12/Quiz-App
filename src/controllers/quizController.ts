@@ -394,3 +394,47 @@ async function updateUser(
     };
   }
 }
+
+// Final result and score handler
+
+export async function getFinalResult(
+  req: CustomRequest<{ Params: ParamsType }>,
+  reply: FastifyReply
+) {
+  try {
+    const userId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
+      req.userId as string
+    );
+    const catId: mongoose.Types.ObjectId = new mongoose.Types.ObjectId(
+      (req.params as ParamsType).id
+    );
+    // No of questions in category
+    const quizScore = await User.aggregate([
+      {
+        $match: { _id: userId },
+      },
+      {
+        $unwind: "$attendedCategoryDetail",
+      },
+      {
+        $match: { "attendedCategoryDetail.categoryId": catId },
+      },
+      {
+        $project: { _id: 0, attendedCategoryDetail: 1 },
+      },
+    ]);
+    if (quizScore.length !== 0) {
+      return reply.code(200).send({ success: true, quizScore });
+    } else {
+      return reply.code(404).send({
+        success: false,
+        message: "There is no data regarding to the perticular quiz category!",
+      });
+    }
+  } catch (error) {
+    reply.code(500).send({
+      success: false,
+      message: `An error occurred while getting final result!, ${error}`,
+    });
+  }
+}

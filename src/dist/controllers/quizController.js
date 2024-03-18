@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.submitAnswer = exports.getQuestions = exports.getAllQuizCategories = exports.uploadQuestions = void 0;
+exports.getFinalResult = exports.submitAnswer = exports.getQuestions = exports.getAllQuizCategories = exports.uploadQuestions = void 0;
 const quizModel_1 = __importDefault(require("../models/quizModel"));
 const questionModel_1 = __importDefault(require("../models/questionModel"));
 const mongoose_1 = __importDefault(require("mongoose"));
@@ -320,3 +320,43 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
         }
     });
 }
+// Final result and score handler
+function getFinalResult(req, reply) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const userId = new mongoose_1.default.Types.ObjectId(req.userId);
+            const catId = new mongoose_1.default.Types.ObjectId(req.params.id);
+            // No of questions in category
+            const quizScore = yield userModel_1.default.aggregate([
+                {
+                    $match: { _id: userId },
+                },
+                {
+                    $unwind: "$attendedCategoryDetail",
+                },
+                {
+                    $match: { "attendedCategoryDetail.categoryId": catId },
+                },
+                {
+                    $project: { _id: 0, attendedCategoryDetail: 1 },
+                },
+            ]);
+            if (quizScore.length !== 0) {
+                return reply.code(200).send({ success: true, quizScore });
+            }
+            else {
+                return reply.code(404).send({
+                    success: false,
+                    message: "There is no data regarding to the perticular quiz category!",
+                });
+            }
+        }
+        catch (error) {
+            reply.code(500).send({
+                success: false,
+                message: `An error occurred while getting final result!, ${error}`,
+            });
+        }
+    });
+}
+exports.getFinalResult = getFinalResult;

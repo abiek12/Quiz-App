@@ -26,6 +26,7 @@ function routes(app) {
         app.get("/:id", { preHandler: auth_1.auth }, quizController_1.getQuestions);
         // submit quizes
         app.post("/submit/:id", { preHandler: auth_1.auth }, quizController_1.submitAnswer);
+        app.get("/result/:id", { preHandler: auth_1.auth }, quizController_1.getFinalResult);
     });
 }
 exports.default = routes;

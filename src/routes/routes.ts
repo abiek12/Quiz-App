@@ -4,6 +4,7 @@ import {
   getAllQuizCategories,
   getQuestions,
   submitAnswer,
+  getFinalResult,
 } from "../controllers/quizController";
 import { signUp, login } from "../controllers/userController";
 import { auth } from "../middlewares/auth";
@@ -23,6 +24,11 @@ async function routes(app: FastifyInstance) {
     "/submit/:id",
     { preHandler: auth },
     submitAnswer as RouteHandlerMethod
+  );
+  app.get(
+    "/result/:id",
+    { preHandler: auth },
+    getFinalResult as RouteHandlerMethod
   );
 }
 
