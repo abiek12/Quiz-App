@@ -420,7 +420,40 @@ export async function getFinalResult(
         $match: { "attendedCategoryDetail.categoryId": catId },
       },
       {
-        $project: { _id: 0, attendedCategoryDetail: 1 },
+        $lookup: {
+          from: "questions", // Replace with the name of your questions collection
+          localField: "attendedCategoryDetail.attendedQuestions.questionId",
+          foreignField: "_id",
+          as: "attendedCategoryDetail.question",
+        },
+      },
+      {
+        $addFields: {
+          "attendedCategoryDetail.attendedQuestions": {
+            $map: {
+              input: "$attendedCategoryDetail.attendedQuestions",
+              as: "aq",
+              in: {
+                question: {
+                  $arrayElemAt: [
+                    "$attendedCategoryDetail.question.question",
+                    0,
+                  ],
+                },
+                selectedOption: "$$aq.selectedOption",
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          "attendedCategoryDetail.categoryId": 1,
+          "attendedCategoryDetail.attendedQuestions": 1,
+          "attendedCategoryDetail.score": 1,
+          "attendedCategoryDetail.question": "$question",
+        },
       },
     ]);
     if (quizScore.length !== 0) {
