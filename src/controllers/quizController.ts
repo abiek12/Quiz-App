@@ -158,9 +158,12 @@ export async function getQuestions(
       req.params.id
     );
     // Retrieving questions based on the category id by populating
-    const questionDetail: QuizDocument | null = await Quiz.findById({
-      _id: categoryId,
-    }).populate("questions");
+    const questionDetail: QuizDocument | null = await Quiz.findById(
+      {
+        _id: categoryId,
+      },
+      { questions: 1, _id: 0 }
+    ).populate("questions");
     if (questionDetail !== null) {
       return reply.code(200).send({ success: true, questionDetail });
     } else {
@@ -275,7 +278,7 @@ async function updateUser(
       if (matchedQuestion) {
         return {
           statuscode: 400,
-          success: true,
+          success: false,
           message: "You have already attended this question!",
         };
       } else {
@@ -405,8 +408,9 @@ export async function getFinalResult(
         },
       },
     ]);
+    const filterQuizDetail = quizResult[0].attendedCategoryDetail;
     if (quizResult.length !== 0) {
-      return reply.code(200).send({ success: true, quizResult });
+      return reply.code(200).send({ success: true, filterQuizDetail });
     } else {
       return reply.code(404).send({
         success: false,

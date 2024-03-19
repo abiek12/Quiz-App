@@ -113,7 +113,7 @@ function getQuestions(req, reply) {
             // Retrieving questions based on the category id by populating
             const questionDetail = yield quizModel_1.default.findById({
                 _id: categoryId,
-            }).populate("questions");
+            }, { questions: 1, _id: 0 }).populate("questions");
             if (questionDetail !== null) {
                 return reply.code(200).send({ success: true, questionDetail });
             }
@@ -205,7 +205,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                 if (matchedQuestion) {
                     return {
                         statuscode: 400,
-                        success: true,
+                        success: false,
                         message: "You have already attended this question!",
                     };
                 }
@@ -328,8 +328,9 @@ function getFinalResult(req, reply) {
                     },
                 },
             ]);
+            const filterQuizDetail = quizResult[0].attendedCategoryDetail;
             if (quizResult.length !== 0) {
-                return reply.code(200).send({ success: true, quizResult });
+                return reply.code(200).send({ success: true, filterQuizDetail });
             }
             else {
                 return reply.code(404).send({
