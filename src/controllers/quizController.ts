@@ -165,7 +165,8 @@ export async function getQuestions(
       { questions: 1, _id: 0 }
     ).populate("questions");
     if (questionDetail !== null) {
-      return reply.code(200).send({ success: true, questionDetail });
+      const filteredQuestionDetail = questionDetail.questions;
+      return reply.code(200).send({ success: true, filteredQuestionDetail });
     } else {
       return reply.code(404).send({
         success: false,
