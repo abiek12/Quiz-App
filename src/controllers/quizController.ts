@@ -290,7 +290,7 @@ async function updateUser(
         // updating the score
         if (userCatScore !== null) {
           Score = userCatScore[0].score;
-          isCorrect ? Score++ : Score;
+          if (isCorrect) Score++;
         }
         // Updating the user document with new data
         await User.findByIdAndUpdate(
@@ -316,58 +316,7 @@ async function updateUser(
             new: true, // Return the modified document
           }
         );
-
-        // Retriving no of attended questions
-        const result = await User.aggregate([
-          {
-            $match: { _id: userId }, // Filter by user ID
-          },
-          {
-            $unwind: "$attendedCategoryDetail", // Unwind attendedCategoryDetail array
-          },
-          {
-            $match: {
-              "attendedCategoryDetail.categoryId": catId,
-            }, // Filter by category ID
-          },
-          {
-            $project: {
-              numberOfQuestions: {
-                $size: "$attendedCategoryDetail.attendedQuestions",
-              }, // Count the number of objects in attendedQuestions array
-            },
-          },
-        ]);
-        // Extract the count from the result
-        const UserQuestCount =
-          result.length > 0 ? result[0].numberOfQuestions : 0;
-
-        // No of questions in category
-        const totalQuest = await Quiz.aggregate([
-          {
-            $match: { _id: catId }, // Filter by category ID
-          },
-          {
-            $project: {
-              numberOfQuestions: { $size: "$questions" },
-            },
-          },
-        ]);
-        // Extract the count from the result
-        const QuizQuestCount =
-          totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
-
-        if (UserQuestCount === QuizQuestCount) {
-          return {
-            statuscode: 200,
-            success: true,
-            Result: isCorrect,
-            message: "Completed",
-            TotalScore: Score,
-          };
-        } else {
-          return { success: true, statuscode: 200, Result: isCorrect };
-        }
+        return { success: true, statuscode: 200, Result: isCorrect };
       }
     } else {
       //Updating Score for the first time
@@ -409,7 +358,7 @@ export async function getFinalResult(
       (req.params as ParamsType).id
     );
     // No of questions in category
-    const quizScore = await User.aggregate([
+    const quizResult = await User.aggregate([
       {
         $match: { _id: userId },
       },
@@ -456,8 +405,8 @@ export async function getFinalResult(
         },
       },
     ]);
-    if (quizScore.length !== 0) {
-      return reply.code(200).send({ success: true, quizScore });
+    if (quizResult.length !== 0) {
+      return reply.code(200).send({ success: true, quizResult });
     } else {
       return reply.code(404).send({
         success: false,

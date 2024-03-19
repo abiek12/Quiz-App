@@ -220,7 +220,8 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                     // updating the score
                     if (userCatScore !== null) {
                         Score = userCatScore[0].score;
-                        isCorrect ? Score++ : Score;
+                        if (isCorrect)
+                            Score++;
                     }
                     // Updating the user document with new data
                     yield userModel_1.default.findByIdAndUpdate({
@@ -242,54 +243,7 @@ function updateUser(userId, catId, questId, SelectedOption, isCorrect) {
                         arrayFilters: [{ "category.categoryId": catId }],
                         new: true, // Return the modified document
                     });
-                    // Retriving no of attended questions
-                    const result = yield userModel_1.default.aggregate([
-                        {
-                            $match: { _id: userId }, // Filter by user ID
-                        },
-                        {
-                            $unwind: "$attendedCategoryDetail", // Unwind attendedCategoryDetail array
-                        },
-                        {
-                            $match: {
-                                "attendedCategoryDetail.categoryId": catId,
-                            }, // Filter by category ID
-                        },
-                        {
-                            $project: {
-                                numberOfQuestions: {
-                                    $size: "$attendedCategoryDetail.attendedQuestions",
-                                }, // Count the number of objects in attendedQuestions array
-                            },
-                        },
-                    ]);
-                    // Extract the count from the result
-                    const UserQuestCount = result.length > 0 ? result[0].numberOfQuestions : 0;
-                    // No of questions in category
-                    const totalQuest = yield quizModel_1.default.aggregate([
-                        {
-                            $match: { _id: catId }, // Filter by category ID
-                        },
-                        {
-                            $project: {
-                                numberOfQuestions: { $size: "$questions" },
-                            },
-                        },
-                    ]);
-                    // Extract the count from the result
-                    const QuizQuestCount = totalQuest.length > 0 ? totalQuest[0].numberOfQuestions : 0;
-                    if (UserQuestCount === QuizQuestCount) {
-                        return {
-                            statuscode: 200,
-                            success: true,
-                            Result: isCorrect,
-                            message: "Completed",
-                            TotalScore: Score,
-                        };
-                    }
-                    else {
-                        return { success: true, statuscode: 200, Result: isCorrect };
-                    }
+                    return { success: true, statuscode: 200, Result: isCorrect };
                 }
             }
             else {
@@ -327,7 +281,7 @@ function getFinalResult(req, reply) {
             const userId = new mongoose_1.default.Types.ObjectId(req.userId);
             const catId = new mongoose_1.default.Types.ObjectId(req.params.id);
             // No of questions in category
-            const quizScore = yield userModel_1.default.aggregate([
+            const quizResult = yield userModel_1.default.aggregate([
                 {
                     $match: { _id: userId },
                 },
@@ -374,8 +328,8 @@ function getFinalResult(req, reply) {
                     },
                 },
             ]);
-            if (quizScore.length !== 0) {
-                return reply.code(200).send({ success: true, quizScore });
+            if (quizResult.length !== 0) {
+                return reply.code(200).send({ success: true, quizResult });
             }
             else {
                 return reply.code(404).send({
